@@ -72,6 +72,7 @@ namespace OPA
                 string text = tmpDoc.SelectSingleNode("//besedilo").InnerText;
                 Corpus corpus = new Corpus();
                 corpus.LoadFromTextSsjTokenizer(text);
+                
                 Console.WriteLine("Oznacujem besedilo...");
                 posTagger.Tag(corpus);
                 XmlDocument doc = new XmlDocument();
@@ -79,16 +80,18 @@ namespace OPA
                 XmlDocumentFragment docPart = doc.CreateDocumentFragment();
                 docPart.InnerXml = tmpDoc.OuterXml;
                 doc.DocumentElement.PrependChild(docPart);
-                Console.WriteLine("Vstavljam meta-podatke o blogu...");
+                                
                 string key = doc.SelectSingleNode("//header/blog").InnerText;
+                BlogMetaData metaData;
                 if (!mBlogMetaData.ContainsKey(key))
                 {
                     Console.WriteLine("*** Ne najdem podatkov o blogu \"{0}\".", key);
+                    continue;
                 }
                 else
                 { 
-                    // insert blog meta-data into the header
-                    BlogMetaData metaData = mBlogMetaData[key];
+                    Console.WriteLine("Vstavljam meta-podatke o blogu...");
+                    metaData = mBlogMetaData[key];
                     XmlNode node = doc.SelectSingleNode("//header");
                     node.AppendChild(doc.CreateElement("blogNaslov")).InnerText = metaData.mBlogTitle;
                     node.AppendChild(doc.CreateElement("blogNaslovKratek")).InnerText = metaData.mBlogTitleShort;
@@ -98,6 +101,14 @@ namespace OPA
                     node.AppendChild(doc.CreateElement("avtorRegija")).InnerText = metaData.mAuthorLocation;
                     node.AppendChild(doc.CreateElement("avtorIzobrazba")).InnerText = metaData.mAuthorEducation;
                 }
+                
+                Console.WriteLine("Racunam znacilke...");
+                // the following is (mostly) taken from Detextive
+                string postTitle = doc.SelectSingleNode("//header/naslov").InnerText;
+                Text txt = new Text(corpus, postTitle, metaData.mBlogUrl/*author identifier is his/her blog identifier*/);
+                txt.ComputeFeatures();
+                Console.WriteLine(txt.mFeatures["ttr"]);
+                
                 Console.WriteLine("Zapisujem rezultate predobdelave (XML)...");
                 XmlWriterSettings xmlSettings = new XmlWriterSettings();
                 xmlSettings.Encoding = Encoding.UTF8;
