@@ -10,5 +10,9 @@ namespace OPA
             = Utils.GetConfigValue("LemmatizerModel", "LemmatizerFeb2012.bin");
         public static readonly string DataFolder
             = Utils.GetConfigValue("DataFolder", ".").TrimEnd('\\');
+        public static readonly string OutputFolder
+            = Utils.GetConfigValue("OutputFolder", ".").TrimEnd('\\');
+        public static readonly string BlogMetaDataFileName
+            = Utils.GetConfigValue("BlogMetaDataFileName", "BlogMetaData.txt");
     }
 }
