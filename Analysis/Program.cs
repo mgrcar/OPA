@@ -17,12 +17,14 @@ namespace Analysis
                 Console.WriteLine("Datoteka {0}...", fileName);
                 XmlDocument doc = new XmlDocument();
                 doc.Load(fileName);
-                Corpus corpus = new Corpus();
-                corpus.LoadFromXmlFile(fileName, /*tagLen=*/int.MaxValue);
-                Text text = new Text(corpus, doc.SelectSingleNode("//header/naslov").InnerText, doc.SelectSingleNode("//header/blog").InnerText/*blog identifier is used as author identifier*/);
-                text.ComputeFeatures(); // computes Detextive features
-                // TODO: compute parse tree features 
-                Console.WriteLine(text.mFeatures["hlLemma"]);
+                //Corpus corpus = new Corpus();
+                //corpus.LoadFromXmlFile(fileName, /*tagLen=*/int.MaxValue);
+                //Text text = new Text(corpus, doc.SelectSingleNode("//header/naslov").InnerText, doc.SelectSingleNode("//header/blog").InnerText/*blog identifier is used as author identifier*/);
+                //text.ComputeFeatures(); // computes Detextive features
+                // run chunker
+                Console.WriteLine("Razkosavam stavke (chunking)...");
+                Chunker.Create(doc);
+                return;
             }
 
             // all done
