@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config.cs" />
     <Compile Include="Features.cs" />
     <Compile Include="AnalysisUtils.cs" />
     <Compile Include="Program.cs" />
