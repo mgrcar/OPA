@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using System.Xml;
 using System.Text;
@@ -36,7 +37,7 @@ namespace OPA
 
         static void LoadBlogMetaData()
         {
-            string fileName = Config.BlogMetaDataFileName;
+            string fileName = Config.BlogMetaDataFile;
             string[] lines = File.ReadAllLines(fileName);
             foreach (string line in lines)
             {
@@ -66,6 +67,7 @@ namespace OPA
             Console.WriteLine("Predobdelava besedil...");
             foreach (string fileName in Directory.GetFiles(Config.DataFolder, "*.xml"))
             {
+                // load text
                 Console.WriteLine("Datoteka {0}...", fileName);
                 XmlDocument tmpDoc = new XmlDocument();
                 tmpDoc.Load(fileName);
@@ -73,14 +75,37 @@ namespace OPA
                 Corpus corpus = new Corpus();
                 corpus.LoadFromTextSsjTokenizer(text);
                 
+                // tag text
                 Console.WriteLine("Oznacujem besedilo...");
                 posTagger.Tag(corpus);
                 XmlDocument doc = new XmlDocument();
-                doc.LoadXml(corpus.ToString("XML"));
+                doc.LoadXml(corpus.ToString("XML-MI"));
+
+                // save tagged text for parsing
+                Console.WriteLine("Pripravljam se na razclenjevanje...");
+                string tmpFileNameIn = Config.TmpFolder + "\\" + Guid.NewGuid().ToString("N") + ".tmp";
+                string tmpFileNameOut = Config.TmpFolder + "\\" + Guid.NewGuid().ToString("N") + ".out.tmp";
+                XmlWriterSettings xmlSettings = new XmlWriterSettings();
+                xmlSettings.Encoding = Encoding.UTF8;
+                xmlSettings.Indent = true;
+                using (XmlWriter w = XmlWriter.Create(tmpFileNameIn, xmlSettings))
+                {
+                    doc.Save(w);
+                }
+
+                // parse text
+                Console.WriteLine("Zaganjam razclenjevalnik...");
+                Parser.Parse(tmpFileNameIn, tmpFileNameOut);
+                // load results
+                doc = new XmlDocument(); // clean start
+                doc.Load(tmpFileNameOut);
+
+                // insert input XML into TEI-XML
                 XmlDocumentFragment docPart = doc.CreateDocumentFragment();
                 docPart.InnerXml = tmpDoc.OuterXml;
                 doc.DocumentElement.PrependChild(docPart);
                                 
+                // insert blog meta-data
                 string key = doc.SelectSingleNode("//header/blog").InnerText;
                 BlogMetaData metaData;
                 if (!mBlogMetaData.ContainsKey(key))
@@ -102,22 +127,18 @@ namespace OPA
                     node.AppendChild(doc.CreateElement("avtorIzobrazba")).InnerText = metaData.mAuthorEducation;
                 }
                 
-                Console.WriteLine("Racunam znacilke...");
-                // the following is (mostly) taken from Detextive
-                string postTitle = doc.SelectSingleNode("//header/naslov").InnerText;
-                Text txt = new Text(corpus, postTitle, metaData.mBlogUrl/*author identifier is his/her blog identifier*/);
-                txt.ComputeFeatures();
-                Console.WriteLine(txt.mFeatures["ttr"]);
-                
-                Console.WriteLine("Zapisujem rezultate predobdelave (XML)...");
-                XmlWriterSettings xmlSettings = new XmlWriterSettings();
-                xmlSettings.Encoding = Encoding.UTF8;
-                xmlSettings.Indent = true;
+                // save preprocessing results
+                Console.WriteLine("Zapisujem rezultate predobdelave...");
                 using (XmlWriter w = XmlWriter.Create(MakeOutputFileName(fileName), xmlSettings))
                 {
                     doc.Save(w);
                 }
+
+                // purge temp folder
+                Directory.GetFiles(Config.TmpFolder, "*.tmp").ToList().ForEach(x => File.Delete(x));
             }
+
+            // all done
             Console.WriteLine("Koncano.");
         }
     }

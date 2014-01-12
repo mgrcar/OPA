@@ -12,7 +12,13 @@ namespace OPA
             = Utils.GetConfigValue("DataFolder", ".").TrimEnd('\\');
         public static readonly string OutputFolder
             = Utils.GetConfigValue("OutputFolder", ".").TrimEnd('\\');
-        public static readonly string BlogMetaDataFileName
-            = Utils.GetConfigValue("BlogMetaDataFileName", "BlogMetaData.txt");
+        public static readonly string BlogMetaDataFile
+            = Utils.GetConfigValue("BlogMetaDataFile", "BlogMetaData.txt");
+        public static readonly string TmpFolder
+            = Utils.GetConfigValue("TmpFolder", @".\Tmp").TrimEnd('\\');
+        public static readonly string ParserModelFile
+            = Utils.GetConfigValue("ParserModelFile", "light.model");
+        public static readonly string ParserFolder
+           = Utils.GetConfigValue("ParserFolder", @".").TrimEnd('\\');
     }
 }
