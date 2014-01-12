@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OPA", "OPA.csproj", "{CD1A6987-2C69-4758-8F95-069AC4C11B1F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OPA", "Preprocessing\OPA.csproj", "{CD1A6987-2C69-4758-8F95-069AC4C11B1F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Latino", "..\Latino\Latino\Latino.csproj", "{5B86AAD5-3FEA-487C-A518-4F846AF09E18}"
 EndProject

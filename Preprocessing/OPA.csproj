@@ -66,11 +66,11 @@
     <Compile Include="Text.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Latino\Latino\Latino.csproj">
+    <ProjectReference Include="..\..\Latino\Latino\Latino.csproj">
       <Project>{5B86AAD5-3FEA-487C-A518-4F846AF09E18}</Project>
       <Name>Latino</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Obeliks\Obeliks\PosTagger\PosTagger2010.csproj">
+    <ProjectReference Include="..\..\Obeliks\Obeliks\PosTagger\PosTagger2010.csproj">
       <Project>{915DA0E9-1BA2-4BBF-87AC-734D49B1EBFC}</Project>
       <Name>PosTagger2010</Name>
     </ProjectReference>
