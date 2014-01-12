@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Latino;
 
-namespace OPA // taken from Detextive
+namespace Analysis // taken from Detextive
 {
     public static class Features
     {

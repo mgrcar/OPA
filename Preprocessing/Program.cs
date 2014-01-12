@@ -97,7 +97,7 @@ namespace OPA
                 Console.WriteLine("Zaganjam razclenjevalnik...");
                 Parser.Parse(tmpFileNameIn, tmpFileNameOut);
                 // load results
-                doc = new XmlDocument(); // clean start
+                doc = new XmlDocument(); 
                 doc.Load(tmpFileNameOut);
 
                 // insert input XML into TEI-XML

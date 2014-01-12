@@ -9,7 +9,7 @@ using Latino.Model;
 using Latino.TextMining;
 using PosTagger;
 
-namespace OPA // taken from Detextive
+namespace Analysis // taken from Detextive
 {
     public class Token
     {
