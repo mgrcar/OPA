@@ -33,39 +33,31 @@ namespace Analysis
             mSeqNum = seqNum;
         }
 
-        public void CollectVP(ArrayList<ParseTreeNode> nodes)
+        public void CollectVP(Set<ParseTreeNode> nodes)
         {
             nodes.Add(this);
-            //mUsed = true;
-            foreach (Pair<string, ParseTreeNode> link in mOutLinks.Where(x => !x.Second.mUsed && (x.First == "del" || (x.First == "dol" && x.Second.mTag.StartsWith("G")))))
+            foreach (Pair<string, ParseTreeNode> link in mOutLinks.Where(x => !x.Second.mUsed && !nodes.Contains(x.Second) && (x.First == "del" || (x.First == "dol" && x.Second.mTag.StartsWith("G")))))
             {
                 link.Second.CollectVP(nodes);
             }
         }
 
-        public void CollectCON(ArrayList<ParseTreeNode> nodes)
+        public void CollectCON(Set<ParseTreeNode> nodes)
         {
             nodes.Add(this);
-            //mUsed = true;
-            foreach (Pair<string, ParseTreeNode> link in mOutLinks.Where(x => !x.Second.mUsed && x.First == "skup"))
+            foreach (Pair<string, ParseTreeNode> link in mOutLinks.Where(x => !x.Second.mUsed && !nodes.Contains(x.Second) && x.First == "skup"))
             {
                 link.Second.CollectCON(nodes);
             }
         }
 
-        public void CollectAll(ArrayList<ParseTreeNode> nodes)
+        public void CollectAll(Set<ParseTreeNode> nodes)
         {
             nodes.Add(this);
-            //mUsed = true;
-            foreach (Pair<string, ParseTreeNode> link in mOutLinks.Where(x => !x.Second.mUsed))
+            foreach (Pair<string, ParseTreeNode> link in mOutLinks.Where(x => !x.Second.mUsed && !nodes.Contains(x.Second)))
             {
                 link.Second.CollectAll(nodes);
             }
-        }
-
-        public override string ToString()
-        {
-            return mWord;
         }
     }
 
@@ -97,17 +89,26 @@ namespace Analysis
 
     public class Chunker
     {
+        private static void OutputChunk(IEnumerable<ParseTreeNode> chunk)
+        {
+            int seqNum = chunk.Min(x => x.mSeqNum);
+            foreach (ParseTreeNode part in chunk.OrderBy(x => x.mSeqNum))
+            {
+                if (seqNum != part.mSeqNum) { Console.Write("... "); }
+                seqNum = part.mSeqNum + 1;
+                Console.Write(part.mWord + " ");
+            }
+            Console.WriteLine();
+        }
+
         public static Chunker Create(XmlDocument xmlDoc)
         {
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(xmlDoc.NameTable);
             nsmgr.AddNamespace("tei", "http://www.tei-c.org/ns/1.0");
             XmlNodeList nodes = xmlDoc.SelectNodes("//tei:text/tei:body//tei:p/tei:s", nsmgr);
-            Console.WriteLine(nodes.Count);
-            foreach (XmlNode node in nodes.Cast<XmlNode>().Take(20)) // for each sentence...
+            MultiSet<string> stats = new MultiSet<string>();
+            foreach (XmlNode node in nodes.Cast<XmlNode>()/*.Take(20)*/) // for each sentence...
             {
-                Console.WriteLine();
-                Console.WriteLine();
-                Console.WriteLine();
                 // read word data
                 int seqNum = 1;
                 Dictionary<string, ParseTreeNode> parseTreeNodes = new Dictionary<string, ParseTreeNode>();                
@@ -136,7 +137,7 @@ namespace Analysis
                         }
                         continue;
                     }                    
-                    if (parseTreeNodes.ContainsKey(fromNodeId) && parseTreeNodes.ContainsKey(toNodeId)) // *** sometimes these things are punctuations - parser errors? 
+                    if (parseTreeNodes.ContainsKey(fromNodeId) && parseTreeNodes.ContainsKey(toNodeId)) // *** sometimes these things are punctuations - these are parser errors
                     {
                         ParseTreeNode fromNode = parseTreeNodes[fromNodeId];
                         ParseTreeNode toNode = parseTreeNodes[toNodeId];
@@ -146,33 +147,74 @@ namespace Analysis
                 }
                 // create chunks
                 // extract VP
-                foreach (ParseTreeNode parseTreeNode in parseTreeNodes.Values.Where(x => !x.mUsed && x.mBlue && x.mTag.StartsWith("G")))
+                Console.WriteLine("VP:");
+                bool repeat = true;
+                while (repeat)
                 {
-                    ArrayList<ParseTreeNode> chunkNodes = new ArrayList<ParseTreeNode>();
-                    parseTreeNode.CollectVP(chunkNodes);
-                    Console.WriteLine("Found VP of len " + chunkNodes.Count);
-                    Console.WriteLine(chunkNodes);
+                    repeat = false;
+                    Set<ParseTreeNode> bestChunk = null;
+                    foreach (ParseTreeNode parseTreeNode in parseTreeNodes.Values.Where(x => !x.mUsed && x.mBlue && x.mTag.StartsWith("G")))
+                    {
+                        repeat = true;
+                        Set<ParseTreeNode> chunkNodes = new Set<ParseTreeNode>();
+                        parseTreeNode.CollectVP(chunkNodes);
+                        if (bestChunk == null || chunkNodes.Count > bestChunk.Count) { bestChunk = chunkNodes; }
+                    }
+                    if (bestChunk != null)
+                    {
+                        bestChunk.ToList().ForEach(x => x.mUsed = true);
+                        Console.Write("\t");
+                        OutputChunk(bestChunk);
+                    }
                 }
                 // extract NP, PP, AdjP
 
                 // extract AP
                 Set<string> linkTypes = new Set<string>("ena,dve,tri,štiri".Split(','));
-                foreach (ParseTreeNode parseTreeNode in parseTreeNodes.Values.Where(x => !x.mUsed && x.mInLinks.Any(y => linkTypes.Contains(y.First)) && x.mTag.StartsWith("R")))
+                Console.WriteLine("AP:");
+                repeat = true;
+                while (repeat)
                 {
-                    ArrayList<ParseTreeNode> chunkNodes = new ArrayList<ParseTreeNode>();
-                    parseTreeNode.CollectAll(chunkNodes);
-                    Console.WriteLine("Found AP of len " + chunkNodes.Count);
-                    Console.WriteLine(chunkNodes);
+                    repeat = false;
+                    Set<ParseTreeNode> bestChunk = null;
+                    foreach (ParseTreeNode parseTreeNode in parseTreeNodes.Values.Where(x => !x.mUsed && x.mInLinks.Any(y => linkTypes.Contains(y.First)) && x.mTag.StartsWith("R")))
+                    {
+                        repeat = true;
+                        Set<ParseTreeNode> chunkNodes = new Set<ParseTreeNode>();
+                        parseTreeNode.CollectAll(chunkNodes);
+                        if (bestChunk == null || chunkNodes.Count > bestChunk.Count) { bestChunk = chunkNodes; }
+                    }
+                    if (bestChunk != null)
+                    {
+                        bestChunk.ToList().ForEach(x => x.mUsed = true);
+                        Console.Write("\t");
+                        OutputChunk(bestChunk);
+                    }
                 }
                 // extract CON
-                foreach (ParseTreeNode parseTreeNode in parseTreeNodes.Values.Where(x => !x.mUsed && x.mInLinks.Any(y => y.First == "vez")))
+                Console.WriteLine("CON:");
+                repeat = true;
+                while (repeat)
                 {
-                    ArrayList<ParseTreeNode> chunkNodes = new ArrayList<ParseTreeNode>();
-                    parseTreeNode.CollectCON(chunkNodes);
-                    Console.WriteLine("Found CON of len " + chunkNodes.Count);
-                    Console.WriteLine(chunkNodes);
+                    repeat = false;
+                    Set<ParseTreeNode> bestChunk = null;
+                    foreach (ParseTreeNode parseTreeNode in parseTreeNodes.Values.Where(x => !x.mUsed && x.mInLinks.Any(y => y.First == "vez")))
+                    {
+                        repeat = true;
+                        Set<ParseTreeNode> chunkNodes = new Set<ParseTreeNode>();
+                        parseTreeNode.CollectCON(chunkNodes);
+                        if (bestChunk == null || chunkNodes.Count > bestChunk.Count) { bestChunk = chunkNodes; }
+                    }
+                    if (bestChunk != null)
+                    {
+                        bestChunk.ToList().ForEach(x => x.mUsed = true);
+                        Console.Write("\t");
+                        OutputChunk(bestChunk);
+                    }
                 }
-                
+                Console.WriteLine();
+                Console.WriteLine("Press [Enter] to continue...");
+                Console.ReadLine();
             }
             return null;
         }
