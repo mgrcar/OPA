@@ -72,6 +72,7 @@ namespace OPA
                 XmlDocument tmpDoc = new XmlDocument();
                 tmpDoc.Load(fileName);
                 string text = tmpDoc.SelectSingleNode("//besedilo").InnerText;
+                if (text.Trim() == "") { continue; } // *** empty documents are ignored
                 Corpus corpus = new Corpus();
                 corpus.LoadFromTextSsjTokenizer(text);
                 
