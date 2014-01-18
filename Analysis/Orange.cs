@@ -7,7 +7,7 @@ namespace Analysis
 {
     public static class Orange
     {
-        public static void SaveOrangeTab(string[] featureNames, LabeledDataset<string, SparseVector<double>> dataset, string fileName)
+        public static void SaveTab(string[] featureNames, LabeledDataset<string, SparseVector<double>> dataset, string fileName)
         {
             using (StreamWriter w = new StreamWriter(fileName, /*append=*/false, Encoding.ASCII))
             {

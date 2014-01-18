@@ -1,56 +1,56 @@
 #Spletna stran	Naslov bloga	Naslov krajši	Kontakt_mail	Spol	Starost	Regija	Izobrazba
-http://irena.blog.siol.net/	Irena Sirena	Irena	strupena.irena@gmail.com	Ž	25 do 34	LJ	srednja šola (trenutno študent)
-http://www.zibelka.si/blog/	Hirkani	Hirkani	hirkani@gmail.com 	Ž	25 do 34	LJ	fakulteta ali več
-http://imedi.si/blog/jeanmark/	Najboljši blog: moja razmišljanja	Razmisljanja	marko.pavlisic@gmail.com	M	35 do 59	LJ	fakulteta ali več
-http://www.ednevnik.si/?w=odsrcadosrca	Od srca do srca	Odsrca	gospamilostljiva@gmail.com	Ž	35 do 59	LJ	srednja šola
-http://jinovsvet.com/blog/	Jinov svet	Jinov		M	25 do 34	MB	srednja šola (trenutno študent)
-http://dronyx.wordpress.com/	Dr. Onyx	Onyx		M			
-http://juniorcek.wordpress.com/	Pri nas	Prinas	easypika@gmail.com	Ž	35 do 59	LJ	fakulteta ali več
-http://xfitkatka.wordpress.com/	Katka, dnevno	Katka	kvisnar@gmail.com	Ž	35 do 59	LJ	fakulteta ali več
-http://www.pepermint.si/	Pepermint: DIY	Pepermint	katja@pepermint.si	Ž			
-http://robertkase.blogspot.com/	Robert Kaše	Robert	robert.kase@kabelnet.net	M	35 do 59	KK	fakulteta ali več
-http://chef.blog.siol.net/	Nergač: več je oslov kot pastirjev	Nergač	nergac.info@gmail.com	M	25 do 34	LJ	
-http://blog.fensismensi.com/	Fensišmensi blog	Fensismensi	ana.fensismensi@gmail.com	Ž	25 do 34	LJ	fakulteta ali več
-http://konoczaspi.blogspot.com/	A_girl	Agirl	puncka.boss@gmail.com	Ž	19 do 24	KR	srednja šola (trenutno študent)
-http://susitegleda.blogspot.com/	Šuši te gleda	Susi	marusa.susi86@gmail.com	Ž	25 do 34	MB	fakulteta ali več
-http://www.edusatis.si/preprostost/	Preprostost: bolj preproste izbire	Preprostost	ales@cerin.si	M	nad 60	LJ	fakulteta ali več
-http://ratoncrack.blogspot.com/	Rat on crack	Ratoncrack	freeeky@gmail.com	Ž	25 do 34	LJ	fakulteta ali več
-http://libertarec.blogspot.com/	Libertarec: kričač na internetu	Libertarec	libertarec@yahoo.co.uk	M			
-http://slovoni.blogspot.com/	Slovonske technobe	Technobe	katja@gabrijelcic.org				
-http://easypika.typepad.com/	Kia Ora: utrinki iz naše dnevne sobe	Kiaora	nikolinca30@hotmail.com	Ž	35 do 59	LJ	fakulteta ali več
+irena.blog.siol.net	Irena Sirena	Irena	strupena.irena@gmail.com	Ž	25 do 34	LJ	srednja šola (trenutno študent)
+www.zibelka.si/blog/	Hirkani	Hirkani	hirkani@gmail.com 	Ž	25 do 34	LJ	fakulteta ali več
+imedi.si/blog/jeanmark/	Najboljši blog: moja razmišljanja	Razmisljanja	marko.pavlisic@gmail.com	M	35 do 59	LJ	fakulteta ali več
+www.ednevnik.si/?w=odsrcadosrca	Od srca do srca	Odsrca	gospamilostljiva@gmail.com	Ž	35 do 59	LJ	srednja šola
+jinovsvet.com/blog/	Jinov svet	Jinov		M	25 do 34	MB	srednja šola (trenutno študent)
+dronyx.wordpress.com/	Dr. Onyx	Onyx		M			
+juniorcek.wordpress.com/	Pri nas	Prinas	easypika@gmail.com	Ž	35 do 59	LJ	fakulteta ali več
+xfitkatka.wordpress.com/	Katka, dnevno	Katka	kvisnar@gmail.com	Ž	35 do 59	LJ	fakulteta ali več
+www.pepermint.si/	Pepermint: DIY	Pepermint	katja@pepermint.si	Ž			
+robertkase.blogspot.com	Robert Kaše	Robert	robert.kase@kabelnet.net	M	35 do 59	KK	fakulteta ali več
+chef.blog.siol.net	Nergač: več je oslov kot pastirjev	Nergač	nergac.info@gmail.com	M	25 do 34	LJ	
+blog.fensismensi.com/	Fensišmensi blog	Fensismensi	ana.fensismensi@gmail.com	Ž	25 do 34	LJ	fakulteta ali več
+konoczaspi.blogspot.com	A_girl	Agirl	puncka.boss@gmail.com	Ž	19 do 24	KR	srednja šola (trenutno študent)
+susitegleda.blogspot.com	Šuši te gleda	Susi	marusa.susi86@gmail.com	Ž	25 do 34	MB	fakulteta ali več
+www.edusatis.si/preprostost/	Preprostost: bolj preproste izbire	Preprostost	ales@cerin.si	M	nad 60	LJ	fakulteta ali več
+ratoncrack.blogspot.com	Rat on crack	Ratoncrack	freeeky@gmail.com	Ž	25 do 34	LJ	fakulteta ali več
+libertarec.blogspot.com	Libertarec: kričač na internetu	Libertarec	libertarec@yahoo.co.uk	M			
+slovoni.blogspot.com	Slovonske technobe	Technobe	katja@gabrijelcic.org				
+easypika.typepad.com/	Kia Ora: utrinki iz naše dnevne sobe	Kiaora	nikolinca30@hotmail.com	Ž	35 do 59	LJ	fakulteta ali več
 beba-conceited.blogspot.com	Life. Style. Fun	Lifestylefun	anita.puksic@gmail.com	Ž	19 do 24	MB	srednja šola
-http://tashky.blogspot.com/	4 is the new 2 	Tashky	mama.polona@gmail.com	Ž	35 do 59	LJ	fakulteta ali več
-http://krizisce.wordpress.com/	Križišče	Krizisce	zajcek.na.zidu@gmail.com	Ž	25 do 34	KR	srednja šola (trenutno študent)
-http://www.ednevnik.si/?u=drsalka	Drsalka: sem se skrijem	Drsalka	drsalka.blog@gmail.com	Ž	35 do 59		
-http://kajakaja.wordpress.com/	Kajakaja blog	Kajakaja	info@handmadeinmoste.com	Ž	19 do 24	KR	srednja šola (trenutno študent)
-http://bata.blog.siol.net/	Bata: Egipt je postal moj dom	Bata	sabina.eldomy@gmail.com	Ž	35 do 59	Drugo	
-http://tokzavesti.blogspot.com/	Tok zavesti: artistka na trapezu	Tok zavesti	kameleonka.kameleonka@gmail.com	Ž		LJ	
-http://www.ednevnik.si/?u=urrska	Urrska: Vse se zgodi z razlogom	Urrska					
-http://pavel.blog.siol.net/	Pavel: moj referenčni okvir	Pavel	pavel33savel@gmail.com	M	35 do 59	KR	fakulteta ali več
-http://www.knezan.blogspot.com/	Knežan	Knezan		M			
-http://vovkonanetu.blogspot.com/	Dimenzija V	Vovko	jozko.vovko@gmail.com	M	25 do 34	NM	fakulteta ali več
-http://drugidom.net/	DRUGI DOM Toinen koti / Andra hem	Drugi dom	drugidom@gmail.com	M	35 do 59	LJ	fakulteta ali več
-http://kruhinvino.com/	Kruh in vino: brez tega ne gre	Kruhinvino	napo@kruhinvino.com	M	35 do 59	LJ	srednja šola
-http://www.ednevnik.si/?w=Mozakar	Možakar	Mozakar		M	35 do 59	PO	fakulteta ali več
-http://www.paradajz.si/	Paradajz	Paradajz	iparadajz@gmail.com	M			
-http://www.ednevnik.si/?u=dusasamote	Duša je sama	Dusa	zavestnasamost@gmail.com	Ž	nad 60	MB	višja ali visoka šola
-http://www.ednevnik.si/?u=klotilda	Klotilda. Potepajmo se skupaj	Klotilda	klotilda@jesenice.net	Ž		KR	
-http://bojanambrozic.wordpress.com/	Bojan Ambrožič	Bojan	ambrozicbojan@hotmail.com	M	19 do 24	KR	fakulteta ali več
-http://www.marinmedak.com/	Marin Medak	Marin	marin@marinmedak.com	M	25 do 34	KP	srednja šola (trenutno študent)
-http://www.caszakreativnost.blogspot.com/	Čas za kreativnost	Kreativnost	maja.blogspot@gmail.com	Ž	35 do 59	LJ	fakulteta ali več
-http://iztokgartner.blog.siol.net/	Iztok Gartner razmišlja na glas	Iztok	iztok.gartner@yahoo.com	M	35 do 59	CE	višja ali visoka šola
-http://www.ednevnik.si/?w=malea	Tina Brinar Photography	Tinabrinar	brinar.tina@gmail.com	Ž	25 do 34	SG	srednja šola (trenutno študent)
-http://www.kiklca.com/kategorija/moji-cevlji-moje-sanje/	Kiklca - Modni blog	Kiklca	info@kiklca.com	Ž			
-http://worldofglamur.blogspot.com/	Pinky's world	Pinky	odstranjen				
-http://wega-lps.blogspot.com/	Wega: v tretje gre rado	Wega	rado.mikolic@gmail.com	M	35 do 59	NM	srednja šola
-http://www.peterlamut.com/	Peter Lamut	Peterlamut	jeti51@gmail.com	M	25 do 34	LJ	fakulteta ali več
-http://kosoblejka-slon.blogspot.com/	Takoj al vdle	Kosoblejka	kosoblejka@gmail.com	Ž	25 do 34	GO	fakulteta ali več
-http://kalejdoskop.blog.siol.net/	Dotik oči ali območje mojih milimetrov	Kalejdoskop	vogrincx@gmail.com	Ž	35 do 59	CE	srednja šola
-http://potepanja.domovoj.com/	Domovojeva potepanja	Domovoj	domovoj@domovoj.com	M			fakulteta ali več
-http://blasch-kitchenwithblas.blogspot.com/	BLAS KITCHEN	Blaz	blaz.kuha@t-2.net	M	35 do 59	LJ	srednja šola
-http://minakranjc.blogspot.com/	Mali dnevnik Mine Kranjc	Minakranjc	mina.kranjc@gmail.com				
+tashky.blogspot.com	4 is the new 2 	Tashky	mama.polona@gmail.com	Ž	35 do 59	LJ	fakulteta ali več
+krizisce.wordpress.com/	Križišče	Krizisce	zajcek.na.zidu@gmail.com	Ž	25 do 34	KR	srednja šola (trenutno študent)
+www.ednevnik.si/?u=drsalka	Drsalka: sem se skrijem	Drsalka	drsalka.blog@gmail.com	Ž	35 do 59		
+kajakaja.wordpress.com/	Kajakaja blog	Kajakaja	info@handmadeinmoste.com	Ž	19 do 24	KR	srednja šola (trenutno študent)
+bata.blog.siol.net	Bata: Egipt je postal moj dom	Bata	sabina.eldomy@gmail.com	Ž	35 do 59	Drugo	
+tokzavesti.blogspot.com	Tok zavesti: artistka na trapezu	Tok zavesti	kameleonka.kameleonka@gmail.com	Ž		LJ	
+www.ednevnik.si/?u=urrska	Urrska: Vse se zgodi z razlogom	Urrska					
+pavel.blog.siol.net	Pavel: moj referenčni okvir	Pavel	pavel33savel@gmail.com	M	35 do 59	KR	fakulteta ali več
+www.knezan.blogspot.com	Knežan	Knezan		M			
+vovkonanetu.blogspot.com	Dimenzija V	Vovko	jozko.vovko@gmail.com	M	25 do 34	NM	fakulteta ali več
+drugidom.net/	DRUGI DOM Toinen koti / Andra hem	Drugi dom	drugidom@gmail.com	M	35 do 59	LJ	fakulteta ali več
+kruhinvino.com/	Kruh in vino: brez tega ne gre	Kruhinvino	napo@kruhinvino.com	M	35 do 59	LJ	srednja šola
+www.ednevnik.si/?w=Mozakar	Možakar	Mozakar		M	35 do 59	PO	fakulteta ali več
+www.paradajz.si/	Paradajz	Paradajz	iparadajz@gmail.com	M			
+www.ednevnik.si/?u=dusasamote	Duša je sama	Dusa	zavestnasamost@gmail.com	Ž	nad 60	MB	višja ali visoka šola
+www.ednevnik.si/?u=klotilda	Klotilda. Potepajmo se skupaj	Klotilda	klotilda@jesenice.net	Ž		KR	
+bojanambrozic.wordpress.com/	Bojan Ambrožič	Bojan	ambrozicbojan@hotmail.com	M	19 do 24	KR	fakulteta ali več
+www.marinmedak.com/	Marin Medak	Marin	marin@marinmedak.com	M	25 do 34	KP	srednja šola (trenutno študent)
+www.caszakreativnost.blogspot.com	Čas za kreativnost	Kreativnost	maja.blogspot@gmail.com	Ž	35 do 59	LJ	fakulteta ali več
+iztokgartner.blog.siol.net	Iztok Gartner razmišlja na glas	Iztok	iztok.gartner@yahoo.com	M	35 do 59	CE	višja ali visoka šola
+www.ednevnik.si/?w=malea	Tina Brinar Photography	Tinabrinar	brinar.tina@gmail.com	Ž	25 do 34	SG	srednja šola (trenutno študent)
+www.kiklca.com/kategorija/moji-cevlji-moje-sanje/	Kiklca - Modni blog	Kiklca	info@kiklca.com	Ž			
+worldofglamur.blogspot.com	Pinky's world	Pinky	odstranjen				
+wega-lps.blogspot.com	Wega: v tretje gre rado	Wega	rado.mikolic@gmail.com	M	35 do 59	NM	srednja šola
+www.peterlamut.com/	Peter Lamut	Peterlamut	jeti51@gmail.com	M	25 do 34	LJ	fakulteta ali več
+kosoblejka-slon.blogspot.com	Takoj al vdle	Kosoblejka	kosoblejka@gmail.com	Ž	25 do 34	GO	fakulteta ali več
+kalejdoskop.blog.siol.net	Dotik oči ali območje mojih milimetrov	Kalejdoskop	vogrincx@gmail.com	Ž	35 do 59	CE	srednja šola
+potepanja.domovoj.com/	Domovojeva potepanja	Domovoj	domovoj@domovoj.com	M			fakulteta ali več
+blasch-kitchenwithblas.blogspot.com	BLAS KITCHEN	Blaz	blaz.kuha@t-2.net	M	35 do 59	LJ	srednja šola
+minakranjc.blogspot.com	Mali dnevnik Mine Kranjc	Minakranjc	mina.kranjc@gmail.com				
 baba-zmeshana.blogspot.com	Baba zmešana: verbalna ventilacija	Babazmesana	ena2345@gmail.com	Ž	25 do 34	LJ	fakulteta ali več
-http://blitz.blog.siol.net/	Kavelj 22	Kavelj	matija gabrovšek	M	35 do 59	LJ	fakulteta ali več
-http://volkec.blog.siol.net/	Iz volkovega b(r)loga: Aleš Prelog	Volk	A.vanderVolk@gmail.com	M	35 do 59	GO	srednja šola
-http://sosed.blog.siol.net/	Smeh, solze in žlica vegete	Vegeta		M	35 do 59		
-http://www.ednevnik.si/?w=Rika	Rikine besede - Rikina poezija	Rika	rikinebesede@gmail.com	Ž	35 do 59		
+blitz.blog.siol.net	Kavelj 22	Kavelj	matija gabrovšek	M	35 do 59	LJ	fakulteta ali več
+volkec.blog.siol.net	Iz volkovega b(r)loga: Aleš Prelog	Volk	A.vanderVolk@gmail.com	M	35 do 59	GO	srednja šola
+sosed.blog.siol.net	Smeh, solze in žlica vegete	Vegeta		M	35 do 59		
+www.ednevnik.si/?w=Rika	Rikine besede - Rikina poezija	Rika	rikinebesede@gmail.com	Ž	35 do 59		

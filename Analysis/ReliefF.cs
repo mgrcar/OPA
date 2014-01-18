@@ -22,9 +22,6 @@ namespace Analysis
 
         private static double Diff(SparseVector<double> a, SparseVector<double> b, SparseVector<double> minValues, SparseVector<double> maxValues) 
         {
-            Utils.ThrowException(a.LastNonEmptyIndex != b.LastNonEmptyIndex 
-                || a.LastNonEmptyIndex != minValues.LastNonEmptyIndex 
-                || a.LastNonEmptyIndex != maxValues.LastNonEmptyIndex ? new ArgumentException() : null);
             double diffSum = 0;
             for (int featureIdx = 0; featureIdx <= a.LastNonEmptyIndex; featureIdx++)
             {

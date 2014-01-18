@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Html.cs" />
     <Compile Include="Orange.cs" />
     <Compile Include="Chunker.cs" />
     <Compile Include="Config.cs" />
@@ -72,6 +73,10 @@
     <EmbeddedResource Include="TagMapping.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Latino\LatinoWorkflows\LatinoWorkflows2010.csproj">
+      <Project>{EDE88AFF-1053-4175-B91C-4E683426706A}</Project>
+      <Name>LatinoWorkflows2010</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Latino\Latino\Latino.csproj">
       <Project>{5B86AAD5-3FEA-487C-A518-4F846AF09E18}</Project>
       <Name>Latino</Name>

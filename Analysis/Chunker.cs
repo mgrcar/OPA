@@ -1,9 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Xml;
 using System.Collections.Generic;
-using Latino;
 using System.IO;
+using Latino;
 
 namespace Analysis
 {
@@ -107,7 +106,8 @@ namespace Analysis
         PP,
         AdjP,
         AP,
-        CON
+        CON,
+        Other
     }
 
     public class Chunk
@@ -125,15 +125,12 @@ namespace Analysis
             mType = type;
             mItems = new ArrayList<ParseTreeNode>(items);
         }
-    }
 
-    public class Chunker
-    {
-        private static string OutputChunk(IEnumerable<ParseTreeNode> chunk)
+        public override string ToString()
         {
-            int seqNum = chunk.Min(x => x.mSeqNum);
+            int seqNum = mItems.Min(x => x.mSeqNum);
             string chunkStr = "";
-            foreach (ParseTreeNode part in chunk.OrderBy(x => x.mSeqNum))
+            foreach (ParseTreeNode part in mItems.OrderBy(x => x.mSeqNum))
             {
                 if (seqNum != part.mSeqNum) { chunkStr += "... "; }
                 seqNum = part.mSeqNum + 1;
@@ -141,21 +138,23 @@ namespace Analysis
             }
             return chunkStr;
         }
+    }
 
+    public static class Chunker
+    {
         static StreamWriter w = new StreamWriter(@"C:\Users\Administrator\Desktop\chunkerV2.txt");
 
-        public static Chunker Create(XmlDocument xmlDoc)
+        public static ArrayList<Chunk> GetChunks(XmlDocument xmlDoc)
         {
-            XmlNamespaceManager nsmgr = new XmlNamespaceManager(xmlDoc.NameTable);
-            nsmgr.AddNamespace("tei", "http://www.tei-c.org/ns/1.0");
-            XmlNodeList nodes = xmlDoc.SelectNodes("//tei:text/tei:body//tei:p/tei:s", nsmgr);
+            ArrayList<Chunk> result = new ArrayList<Chunk>();
+            XmlNodeList nodes = xmlDoc.SelectNodes("//text/body//p/s");
             MultiSet<string> stats = new MultiSet<string>();
-            foreach (XmlNode node in nodes/*.Cast<XmlNode>().Take(20)*/) // for each sentence...
+            foreach (XmlNode node in nodes) // for each sentence...
             {
                 // read word data
                 int seqNum = 1;
                 Dictionary<string, ParseTreeNode> parseTreeNodes = new Dictionary<string, ParseTreeNode>();                
-                foreach (XmlNode wordNode in node.SelectNodes("tei:w", nsmgr))
+                foreach (XmlNode wordNode in node.SelectNodes("w"))
                 {
                     ParseTreeNode parseTreeNode = new ParseTreeNode(
                         wordNode.InnerText,
@@ -167,14 +166,14 @@ namespace Analysis
                     parseTreeNodes.Add(parseTreeNode.mId, parseTreeNode);
                 }
                 w.WriteLine();
-                foreach (XmlNode wordNode in node.SelectNodes("tei:w | tei:c", nsmgr)) 
+                foreach (XmlNode wordNode in node.SelectNodes("w | c")) 
                 {
                     w.Write(wordNode.InnerText + " ");
                 }
                 w.WriteLine();
                 w.WriteLine();
                 // read parse tree
-                foreach (XmlNode linkNode in node.SelectNodes("tei:links/tei:link", nsmgr))
+                foreach (XmlNode linkNode in node.SelectNodes("links/link"))
                 {
                     string type = linkNode.Attributes["afun"].Value;
                     string fromNodeId = linkNode.Attributes["from"].Value;
@@ -215,7 +214,8 @@ namespace Analysis
                         bestChunk.ToList().ForEach(x => x.mUsed = true);
                         repeat = true;
                         w.Write("\t");
-                        w.WriteLine(OutputChunk(bestChunk));
+                        result.Add(new Chunk(ChunkType.VP, bestChunk));
+                        w.WriteLine(result.Last);
                     }
                 }
                 // extract CON
@@ -236,7 +236,8 @@ namespace Analysis
                         bestChunk.ToList().ForEach(x => x.mUsed = true);
                         repeat = true;
                         w.Write("\t");
-                        w.WriteLine(OutputChunk(bestChunk));
+                        result.Add(new Chunk(ChunkType.CON, bestChunk));
+                        w.WriteLine(result.Last);
                     }
                 }
                 // extract NP/PP
@@ -278,13 +279,15 @@ namespace Analysis
                 foreach (Chunk chunk in allChunks.Where(x => x.mType == ChunkType.NP))
                 {
                     w.Write('\t');
-                    w.WriteLine(OutputChunk(chunk.mItems));
+                    result.Add(chunk);
+                    w.WriteLine(chunk.ToString());
                 }
                 w.WriteLine("PP:");
                 foreach (Chunk chunk in allChunks.Where(x => x.mType == ChunkType.PP))
                 {
                     w.Write('\t');
-                    w.WriteLine(OutputChunk(chunk.mItems));
+                    result.Add(chunk);
+                    w.WriteLine(chunk.ToString());
                 }
                 // extract AdjP
                 repeat = true;
@@ -319,7 +322,8 @@ namespace Analysis
                         bestChunk.mItems.ToList().ForEach(x => x.mUsed = true);
                         repeat = true;
                         w.Write("\t");
-                        w.WriteLine(OutputChunk(bestChunk.mItems));
+                        result.Add(bestChunk);
+                        w.WriteLine(bestChunk);
                     }
                 }
                 // extract AP
@@ -340,12 +344,34 @@ namespace Analysis
                         bestChunk.ToList().ForEach(x => x.mUsed = true);
                         repeat = true;
                         w.Write("\t");
-                        w.WriteLine(OutputChunk(bestChunk));
+                        result.Add(new Chunk(ChunkType.AP, bestChunk));
+                        w.WriteLine(result.Last);
+                    }
+                }
+                // extract othe chunks
+                w.WriteLine("other:");
+                repeat = true;
+                while (repeat)
+                {
+                    repeat = false;
+                    Set<ParseTreeNode> bestChunk = null;
+                    foreach (ParseTreeNode parseTreeNode in parseTreeNodes.Values.Where(x => !x.mUsed))
+                    {
+                        Set<ParseTreeNode> chunkNodes = new Set<ParseTreeNode>();
+                        parseTreeNode.CollectAll(chunkNodes);
+                        if (bestChunk == null || chunkNodes.Count > bestChunk.Count) { bestChunk = chunkNodes; }
+                    }
+                    if (bestChunk != null)
+                    {
+                        bestChunk.ToList().ForEach(x => x.mUsed = true);
+                        repeat = true;
+                        w.Write("\t");
+                        result.Add(new Chunk(ChunkType.Other, bestChunk));
+                        w.WriteLine(result.Last);
                     }
                 }
             }
-            w.Close();
-            return null;
+            return result;
         }
     }
 }

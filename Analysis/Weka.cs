@@ -10,7 +10,7 @@ namespace Analysis
 {
     public static class Weka
     {
-        public static void SaveWekaArff(string[] featureNames, LabeledDataset<string, SparseVector<double>> dataset, string fileName)
+        public static void SaveArff(string[] featureNames, LabeledDataset<string, SparseVector<double>> dataset, string fileName)
         {
             using (StreamWriter w = new StreamWriter(fileName, /*append=*/false, Encoding.ASCII))
             {

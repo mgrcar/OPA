@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LemmaSharp2010", "..\Obelik
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Analysis", "Analysis\Analysis.csproj", "{6974B685-D437-4D88-8C25-91E5E1A5F596}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LatinoWorkflows2010", "..\Latino\LatinoWorkflows\LatinoWorkflows2010.csproj", "{EDE88AFF-1053-4175-B91C-4E683426706A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{6974B685-D437-4D88-8C25-91E5E1A5F596}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6974B685-D437-4D88-8C25-91E5E1A5F596}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6974B685-D437-4D88-8C25-91E5E1A5F596}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDE88AFF-1053-4175-B91C-4E683426706A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDE88AFF-1053-4175-B91C-4E683426706A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDE88AFF-1053-4175-B91C-4E683426706A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDE88AFF-1053-4175-B91C-4E683426706A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

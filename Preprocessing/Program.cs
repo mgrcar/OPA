@@ -62,9 +62,9 @@ namespace OPA
         {
             Console.WriteLine("Nalagam meta-podatke o blogih...");
             LoadBlogMetaData();
-            Console.WriteLine("Inicializacija Obeliksa...");
+            Console.WriteLine("Nalagam oznacevalnik...");
             PartOfSpeechTagger posTagger = new PartOfSpeechTagger(Config.PosTaggerModel, Config.LemmatizerModel);
-            Console.WriteLine("Predobdelava besedil...");
+            XmlDocument fullDoc = null;
             foreach (string fileName in Directory.GetFiles(Config.DataFolder, "*.xml"))
             {
                 // load text
@@ -74,38 +74,58 @@ namespace OPA
                 string text = tmpDoc.SelectSingleNode("//besedilo").InnerText;
                 if (text.Trim() == "") { continue; } // *** empty documents are ignored
                 Corpus corpus = new Corpus();
-                corpus.LoadFromTextSsjTokenizer(text);
-                
+                corpus.LoadFromTextSsjTokenizer(text);                
                 // tag text
                 Console.WriteLine("Oznacujem besedilo...");
                 posTagger.Tag(corpus);
                 XmlDocument doc = new XmlDocument();
-                doc.LoadXml(corpus.ToString("XML-MI"));
-
-                // save tagged text for parsing
-                Console.WriteLine("Pripravljam se na razclenjevanje...");
-                string tmpFileNameIn = Config.TmpFolder + "\\" + Guid.NewGuid().ToString("N") + ".tmp";
-                string tmpFileNameOut = Config.TmpFolder + "\\" + Guid.NewGuid().ToString("N") + ".out.tmp";
-                XmlWriterSettings xmlSettings = new XmlWriterSettings();
-                xmlSettings.Encoding = Encoding.UTF8;
-                xmlSettings.Indent = true;
-                using (XmlWriter w = XmlWriter.Create(tmpFileNameIn, xmlSettings))
+                doc.LoadXml(corpus.ToString("XML-MI").Replace("xmlns=\"http://www.tei-c.org/ns/1.0\"", "")); // *** remove this f***ing namespace
+                ((XmlElement)doc.SelectSingleNode("//text")).SetAttribute("fileName", fileName);
+                // append text to fullDoc
+                if (fullDoc == null)
                 {
-                    doc.Save(w);
+                    fullDoc = doc;
                 }
-
-                // parse text
-                Console.WriteLine("Zaganjam razclenjevalnik...");
-                Parser.Parse(tmpFileNameIn, tmpFileNameOut);
-                // load results
-                doc = new XmlDocument(); 
-                doc.Load(tmpFileNameOut);
-
+                else
+                {
+                    XmlDocumentFragment xmlFrag = fullDoc.CreateDocumentFragment();
+                    xmlFrag.InnerXml = doc.SelectSingleNode("//text").OuterXml;
+                    fullDoc.DocumentElement.AppendChild(xmlFrag);
+                }
+            }
+            // save tagged text for parsing
+            Console.WriteLine("Pripravljam datoteke za razclenjevanje...");
+            Guid tmpId = Guid.NewGuid();
+            string tmpFileNameIn = Config.TmpFolder + "\\" + tmpId.ToString("N") + ".tmp";
+            string tmpFileNameOut = Config.TmpFolder + "\\" + tmpId.ToString("N") + ".out.tmp";
+            XmlWriterSettings xmlSettings = new XmlWriterSettings();
+            xmlSettings.Encoding = Encoding.UTF8;
+            xmlSettings.Indent = true;
+            using (XmlWriter w = XmlWriter.Create(tmpFileNameIn, xmlSettings))
+            {
+                fullDoc.Save(w);
+            }
+            // parse text
+            Console.WriteLine("Zaganjam razclenjevalnik...");
+            Parser.Parse(tmpFileNameIn, tmpFileNameOut);
+            // load results
+            fullDoc = new XmlDocument(); 
+            fullDoc.Load(tmpFileNameOut);
+            // create output files
+            Console.WriteLine("Pisem izhodne datoteke...");
+            foreach (XmlNode txtNode in fullDoc.SelectNodes("//text"))
+            {
+                string fileName = txtNode.Attributes["fileName"].Value;
+                ((XmlElement)txtNode).RemoveAttribute("fileName");
+                Console.WriteLine("Datoteka {0}...", fileName);
+                XmlDocument tmpDoc = new XmlDocument();
+                tmpDoc.Load(fileName);
                 // insert input XML into TEI-XML
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml("<TEI>" + txtNode.OuterXml + "</TEI>");
                 XmlDocumentFragment docPart = doc.CreateDocumentFragment();
                 docPart.InnerXml = tmpDoc.OuterXml;
                 doc.DocumentElement.PrependChild(docPart);
-                                
                 // insert blog meta-data
                 string key = doc.SelectSingleNode("//header/blog").InnerText;
                 BlogMetaData metaData;
@@ -115,7 +135,7 @@ namespace OPA
                     continue;
                 }
                 else
-                { 
+                {
                     Console.WriteLine("Vstavljam meta-podatke o blogu...");
                     metaData = mBlogMetaData[key];
                     XmlNode node = doc.SelectSingleNode("//header");
@@ -127,18 +147,15 @@ namespace OPA
                     node.AppendChild(doc.CreateElement("avtorRegija")).InnerText = metaData.mAuthorLocation;
                     node.AppendChild(doc.CreateElement("avtorIzobrazba")).InnerText = metaData.mAuthorEducation;
                 }
-                
-                // save preprocessing results
-                Console.WriteLine("Zapisujem rezultate predobdelave...");
+                // write results
+                Console.WriteLine("Zapisujem rezultate...");
                 using (XmlWriter w = XmlWriter.Create(MakeOutputFileName(fileName), xmlSettings))
                 {
                     doc.Save(w);
                 }
-
-                // purge temp folder
-                Directory.GetFiles(Config.TmpFolder, "*.tmp").ToList().ForEach(x => File.Delete(x));
             }
-
+            // purge temp folder
+            Directory.GetFiles(Config.TmpFolder, "*.tmp").ToList().ForEach(x => File.Delete(x));
             // all done
             Console.WriteLine("Koncano.");
         }
