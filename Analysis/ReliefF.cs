@@ -8,7 +8,7 @@ namespace Analysis
 {
     public static class ReliefF
     {
-        public static void GetExtremes(LabeledDataset<string, SparseVector<double>> dataset, out SparseVector<double> minValues, out SparseVector<double> maxValues) 
+        private static void GetExtremes(LabeledDataset<string, SparseVector<double>> dataset, out SparseVector<double> minValues, out SparseVector<double> maxValues) 
         {
             minValues = new SparseVector<double>();
             maxValues = new SparseVector<double>();
@@ -20,7 +20,7 @@ namespace Analysis
             }
         }
 
-        public static double Diff(SparseVector<double> a, SparseVector<double> b, SparseVector<double> minValues, SparseVector<double> maxValues) 
+        private static double Diff(SparseVector<double> a, SparseVector<double> b, SparseVector<double> minValues, SparseVector<double> maxValues) 
         {
             Utils.ThrowException(a.LastNonEmptyIndex != b.LastNonEmptyIndex 
                 || a.LastNonEmptyIndex != minValues.LastNonEmptyIndex 
@@ -33,12 +33,12 @@ namespace Analysis
             return diffSum;
         }
 
-        public static double Diff(int featureIdx, SparseVector<double> a, SparseVector<double> b, SparseVector<double> minValues, SparseVector<double> maxValues) 
+        private static double Diff(int featureIdx, SparseVector<double> a, SparseVector<double> b, SparseVector<double> minValues, SparseVector<double> maxValues) 
         {
             return Math.Abs(a[featureIdx] - b[featureIdx]) / (maxValues[featureIdx] - minValues[featureIdx]);
         }
 
-        public static double ComputeClassProbability(LabeledDataset<string, SparseVector<double>> dataset, string label) 
+        private static double ClassProbability(LabeledDataset<string, SparseVector<double>> dataset, string label) 
         {
             return (double)((IEnumerable<LabeledExample<string, SparseVector<double>>>)dataset).Count(x => x.Label == label) / (double)dataset.Count; 
         }
@@ -90,14 +90,14 @@ namespace Analysis
                     M.Add(C, MC);
                 }
                 // for A := 1 to a do ...
-                double P_Ri = ComputeClassProbability(dataset, Ri.Label);
+                double P_Ri = ClassProbability(dataset, Ri.Label);
                 for (int A = 0; A <= minValues.LastNonEmptyIndex; A++)
                 {
                     double sum1 = new double[H.Count]
                         .Select((x, j) => Diff(A, Ri.Example, H[j].Example, minValues, maxValues))
                         .Sum();
                     var sum2 = M.Keys
-                        .Select(C => ComputeClassProbability(dataset, C) / (1.0 - P_Ri) * new double[M[C].Count]
+                        .Select(C => ClassProbability(dataset, C) / (1.0 - P_Ri) * new double[M[C].Count]
                             .Select((x, j) => Diff(A, Ri.Example, M[C][j].Example, minValues, maxValues))
                             .Sum()
                             )
