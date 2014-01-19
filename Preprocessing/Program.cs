@@ -11,6 +11,7 @@ namespace OPA
 {
     class BlogMetaData
     {
+        public string mBlog = "";
         public string mBlogUrl = "";
         public string mBlogTitle = "";
         public string mBlogTitleShort = "";
@@ -45,15 +46,16 @@ namespace OPA
                 {
                     string[] fields = line.Split('\t');
                     BlogMetaData blogMetaData = new BlogMetaData();
-                    blogMetaData.mBlogUrl = fields[0];
-                    blogMetaData.mBlogTitle = fields[1];
-                    blogMetaData.mBlogTitleShort = fields[2];
-                    if (fields.Length > 3) { blogMetaData.mAuthorEMail = fields[3]; }
-                    if (fields.Length > 4) { blogMetaData.mAuthorGender = fields[4]; }
-                    if (fields.Length > 5) { blogMetaData.mAuthorAge = fields[5]; }
-                    if (fields.Length > 6) { blogMetaData.mAuthorLocation = fields[6]; }
-                    if (fields.Length > 7) { blogMetaData.mAuthorEducation = fields[7]; }
-                    mBlogMetaData.Add(blogMetaData.mBlogUrl, blogMetaData);
+                    blogMetaData.mBlog = fields[0];
+                    blogMetaData.mBlogUrl = fields[1];
+                    blogMetaData.mBlogTitle = fields[2];
+                    blogMetaData.mBlogTitleShort = fields[3];
+                    if (fields.Length > 4) { blogMetaData.mAuthorEMail = fields[4]; }
+                    if (fields.Length > 5) { blogMetaData.mAuthorGender = fields[5]; }
+                    if (fields.Length > 6) { blogMetaData.mAuthorAge = fields[6]; }
+                    if (fields.Length > 7) { blogMetaData.mAuthorLocation = fields[7]; }
+                    if (fields.Length > 8) { blogMetaData.mAuthorEducation = fields[8]; }
+                    mBlogMetaData.Add(blogMetaData.mBlog, blogMetaData);
                 }
             }
         }
@@ -70,7 +72,9 @@ namespace OPA
                 // load text
                 Console.WriteLine("Datoteka {0}...", fileName);
                 XmlDocument tmpDoc = new XmlDocument();
-                tmpDoc.Load(fileName);
+                string xml = File.ReadAllText(fileName);
+                xml = xml.Replace("// ]]>", "").Replace("//--><!]]>", "");
+                tmpDoc.LoadXml(xml);
                 string text = tmpDoc.SelectSingleNode("//besedilo").InnerText;
                 if (text.Trim() == "") { continue; } // *** empty documents are ignored
                 Corpus corpus = new Corpus();
@@ -92,6 +96,13 @@ namespace OPA
                     xmlFrag.InnerXml = doc.SelectSingleNode("//text").OuterXml;
                     fullDoc.DocumentElement.AppendChild(xmlFrag);
                 }
+                // check if meta-data exists
+                //string key = tmpDoc.SelectSingleNode("//header/blog").InnerText;
+                //if (!mBlogMetaData.ContainsKey(key))
+                //{
+                //    Console.WriteLine("*** Cannot find meta-data for " + key);
+                //    return;
+                //}
             }
             // save tagged text for parsing
             Console.WriteLine("Pripravljam datoteke za razclenjevanje...");
@@ -139,9 +150,10 @@ namespace OPA
                     Console.WriteLine("Vstavljam meta-podatke o blogu...");
                     metaData = mBlogMetaData[key];
                     XmlNode node = doc.SelectSingleNode("//header");
+                    node.AppendChild(doc.CreateElement("blogSpletniNaslov")).InnerText = metaData.mBlogUrl;
                     node.AppendChild(doc.CreateElement("blogNaslov")).InnerText = metaData.mBlogTitle;
                     node.AppendChild(doc.CreateElement("blogNaslovKratek")).InnerText = metaData.mBlogTitleShort;
-                    node.AppendChild(doc.CreateElement("avtorEMail")).InnerText = metaData.mAuthorEMail;
+                    //node.AppendChild(doc.CreateElement("avtorEMail")).InnerText = metaData.mAuthorEMail;
                     node.AppendChild(doc.CreateElement("avtorSpol")).InnerText = metaData.mAuthorGender;
                     node.AppendChild(doc.CreateElement("avtorStarost")).InnerText = metaData.mAuthorAge;
                     node.AppendChild(doc.CreateElement("avtorRegija")).InnerText = metaData.mAuthorLocation;
