@@ -1,6 +1,6 @@
 ﻿using System.Linq;
-using System.Xml;
 using System.Collections.Generic;
+using System.Xml;
 using System.IO;
 using Latino;
 
@@ -33,68 +33,13 @@ namespace Analysis
             mSeqNum = seqNum;
         }
 
-        public void CollectVP(Set<ParseTreeNode> nodes)
+        public void CollectAll(Set<ParseTreeNode> nodes, Set<ParseTreeNode> tabu)
         {
             nodes.Add(this);
-            foreach (Pair<string, ParseTreeNode> link in mOutLinks.Where(x => !x.Second.mUsed && !nodes.Contains(x.Second) && (x.First == "del" || (x.First == "dol" && x.Second.mTag.StartsWith("G")))))
+            tabu.Add(this);
+            foreach (Pair<string, ParseTreeNode> link in mOutLinks.Where(x => !x.Second.mUsed && !tabu.Contains(x.Second)))
             {
-                link.Second.CollectVP(nodes);
-            }
-        }
-
-        public void CollectCON(Set<ParseTreeNode> nodes)
-        {
-            nodes.Add(this);
-            foreach (Pair<string, ParseTreeNode> link in mOutLinks.Where(x => !x.Second.mUsed && !nodes.Contains(x.Second) && x.First == "skup"))
-            {
-                link.Second.CollectCON(nodes);
-            }
-        }
-
-        public void CollectAll(Set<ParseTreeNode> nodes)
-        {
-            nodes.Add(this);
-            foreach (Pair<string, ParseTreeNode> link in mOutLinks.Where(x => !x.Second.mUsed && !nodes.Contains(x.Second)))
-            {
-                link.Second.CollectAll(nodes);
-            }
-        }
-
-        public void CollectAdjP(Set<ParseTreeNode> nodes, int depth, ArrayList<Chunk> chunks)
-        {
-            nodes.Add(this);
-            // check if it is adjective
-            if (mTag.StartsWith("P"))
-            {
-                Set<ParseTreeNode> chunkNodes = new Set<ParseTreeNode>();
-                CollectAll(chunkNodes);
-                Chunk chunk = new Chunk(ChunkType.AdjP, chunkNodes);
-                chunk.mDepth = depth;
-                chunks.Add(chunk);
-            }
-            // process children
-            foreach (Pair<string, ParseTreeNode> link in mOutLinks.Where(x => !x.Second.mUsed && !nodes.Contains(x.Second) && (x.First == "dol" || x.First == "prir")))
-            {
-                link.Second.CollectAdjP(nodes, depth + 1, chunks);
-            }
-        }
-
-        public void CollectNP_PP(Set<ParseTreeNode> nodes, int depth, ArrayList<Chunk> chunks, ParseTreeNode comingFrom)
-        {
-            nodes.Add(this);
-            // check if it is noun
-            if (mTag.StartsWith("S") /*&& (comingFrom == null || !comingFrom.mTag.StartsWith("S"))*/)
-            {
-                Set<ParseTreeNode> chunkNodes = new Set<ParseTreeNode>();
-                CollectAll(chunkNodes);
-                Chunk chunk = new Chunk(chunkNodes.Any(x => x.mTag.StartsWith("D")) ? ChunkType.PP : ChunkType.NP, chunkNodes);
-                chunk.mDepth = depth;
-                chunks.Add(chunk);
-            }
-            // process children
-            foreach (Pair<string, ParseTreeNode> link in mOutLinks.Where(x => !x.Second.mUsed && !nodes.Contains(x.Second) && (x.First == "dol" || x.First == "prir")))
-            {
-                link.Second.CollectNP_PP(nodes, depth + 1, chunks, this);
+                link.Second.CollectAll(nodes, tabu);
             }
         }
     }
@@ -138,15 +83,79 @@ namespace Analysis
             }
             return chunkStr;
         }
+    
     }
 
     public static class Chunker
     {
         static StreamWriter w = new StreamWriter(@"C:\Users\Administrator\Desktop\chunkerV2.txt");
 
+        public static void CreateChunksDfs(ParseTreeNode node, string rel, Set<ParseTreeNode> tabu, ArrayList<Chunk> chunks)
+        {
+            tabu.Add(node);
+            foreach (Pair<string, ParseTreeNode> childInfo in node.mOutLinks)
+            {
+                if (!tabu.Contains(childInfo.Second))
+                {
+                    CreateChunksDfs(childInfo.Second, childInfo.First, tabu, chunks);
+                }
+            }
+            // check if we should cut here
+            Set<string> linksToCut = new Set<string>("modra,ena,dve,tri,štiri,dol,prir".Split(','));
+            // if I came here via "vez" ...
+            if (rel == "vez")
+            {
+                // ... then the subtree starting at this node is CON
+                Set<ParseTreeNode> nodes = new Set<ParseTreeNode>();
+                node.CollectAll(nodes, tabu);
+                //Console.WriteLine("Found CON: " + new Chunk(ChunkType.CON, nodes));
+                chunks.Add(new Chunk(ChunkType.CON, nodes));
+                return;
+            }
+            // if I came here via "modra", "1", "2", "3", "4", "dol", or "prir" ...
+            else if (linksToCut.Contains(rel)) 
+            {
+                // ... and this node is "G" or "Pd" ...
+                if (node.mTag.StartsWith("G") || node.mTag.StartsWith("Pd"))
+                {
+                    // ... then the subtree starting at this node is VP
+                    Set<ParseTreeNode> nodes = new Set<ParseTreeNode>();
+                    node.CollectAll(nodes, tabu);
+                    //Console.WriteLine("Found VP: " + new Chunk(ChunkType.VP, nodes));
+                    chunks.Add(new Chunk(ChunkType.VP, nodes));
+                    return;
+                }
+                // ... and this node is "P", "R", "S", "K", or "Z" ...
+                else if (node.mTag.StartsWith("P") || node.mTag.StartsWith("R") || node.mTag.StartsWith("S") || node.mTag.StartsWith("K") || node.mTag.StartsWith("Z"))
+                { 
+                    // ... then the subtree starting at this node is AP, AdjP, NP, or PP
+                    // * PP: as soon as there's D in the subtree
+                    // * AP: no D in the subtree & this node is R
+                    // * AdjP: no D in the subtree & this node is P
+                    // * NP: no D in the subtree & this node is S, K, or Z
+                    Set<ParseTreeNode> nodes = new Set<ParseTreeNode>();
+                    node.CollectAll(nodes, tabu);
+                    ChunkType chunkType = ChunkType.NP;
+                    if (nodes.Any(x => x.mTag.StartsWith("D"))) 
+                    { 
+                        chunkType = ChunkType.PP; 
+                    }
+                    else
+                    {
+                        if (node.mTag.StartsWith("R")) { chunkType = ChunkType.AP; }
+                        else if (node.mTag.StartsWith("P")) { chunkType = ChunkType.AdjP; }
+                    }
+                    //Console.WriteLine("Found " + chunkType + ": " + new Chunk(chunkType, nodes));
+                    chunks.Add(new Chunk(chunkType, nodes));
+                    return;
+                }
+            }
+            tabu.Remove(node);
+        }
+
         public static ArrayList<Chunk> GetChunks(XmlDocument xmlDoc)
         {
-            ArrayList<Chunk> result = new ArrayList<Chunk>();
+            ArrayList<Chunk> chunks = new ArrayList<Chunk>();
             XmlNodeList nodes = xmlDoc.SelectNodes("//text/body//p/s");
             MultiSet<string> stats = new MultiSet<string>();
             foreach (XmlNode node in nodes) // for each sentence...
@@ -186,192 +195,35 @@ namespace Analysis
                         }
                         continue;
                     }                    
-                    if (parseTreeNodes.ContainsKey(fromNodeId) && parseTreeNodes.ContainsKey(toNodeId)) // *** sometimes these things are punctuations - these are parser errors
+                    if (parseTreeNodes.ContainsKey(fromNodeId) && parseTreeNodes.ContainsKey(toNodeId)) // *** sometimes these things are punctuations - are these parser errors?
                     {
                         ParseTreeNode fromNode = parseTreeNodes[fromNodeId];
                         ParseTreeNode toNode = parseTreeNodes[toNodeId];
                         fromNode.mOutLinks.Add(new Pair<string, ParseTreeNode>(type, toNode));
                         toNode.mInLinks.Add(new Pair<string, ParseTreeNode>(type, fromNode));
                     }
-                }
-                // create chunks
-                Set<string> numericLinkTypes = new Set<string>("ena,dve,tri,štiri".Split(','));
-                // extract VP
-                w.WriteLine("VP:");
-                bool repeat = true;
-                while (repeat)
+                }                
+                // find trees pointed to by "blue"
+                ArrayList<Chunk> chunksThisSentence = new ArrayList<Chunk>();
+                foreach (ParseTreeNode treeNode in parseTreeNodes.Values.Where(x => x.mBlue))
                 {
-                    repeat = false;
-                    Set<ParseTreeNode> bestChunk = null;
-                    foreach (ParseTreeNode parseTreeNode in parseTreeNodes.Values.Where(x => !x.mUsed && x.mBlue && x.mTag.StartsWith("G")))
-                    {                        
-                        Set<ParseTreeNode> chunkNodes = new Set<ParseTreeNode>();
-                        parseTreeNode.CollectVP(chunkNodes);
-                        if (bestChunk == null || chunkNodes.Count > bestChunk.Count) { bestChunk = chunkNodes; }
-                    }
-                    if (bestChunk != null)
-                    {
-                        bestChunk.ToList().ForEach(x => x.mUsed = true);
-                        repeat = true;
-                        w.Write("\t");
-                        result.Add(new Chunk(ChunkType.VP, bestChunk));
-                        w.WriteLine(result.Last);
-                    }
+                    // find chunks in a DFS manner
+                    Set<ParseTreeNode> tabu = new Set<ParseTreeNode>();                    
+                    CreateChunksDfs(treeNode, "modra", tabu, chunksThisSentence);
                 }
-                // extract CON
-                w.WriteLine("CON:");
-                repeat = true;
-                while (repeat)
+                chunks.AddRange(chunksThisSentence);
+                // write chunks
+                ChunkType[] types = new ChunkType[] { ChunkType.VP, ChunkType.CON, ChunkType.NP, ChunkType.PP, ChunkType.AdjP, ChunkType.AP };
+                foreach (ChunkType type in types)
                 {
-                    repeat = false;
-                    Set<ParseTreeNode> bestChunk = null;
-                    foreach (ParseTreeNode parseTreeNode in parseTreeNodes.Values.Where(x => !x.mUsed && x.mInLinks.Any(y => y.First == "vez")))
-                    {                        
-                        Set<ParseTreeNode> chunkNodes = new Set<ParseTreeNode>();
-                        parseTreeNode.CollectCON(chunkNodes);
-                        if (bestChunk == null || chunkNodes.Count > bestChunk.Count) { bestChunk = chunkNodes; }
-                    }
-                    if (bestChunk != null)
+                    w.WriteLine(type + ":");
+                    foreach (Chunk chunk in chunksThisSentence.Where(x => x.mType == type))
                     {
-                        bestChunk.ToList().ForEach(x => x.mUsed = true);
-                        repeat = true;
-                        w.Write("\t");
-                        result.Add(new Chunk(ChunkType.CON, bestChunk));
-                        w.WriteLine(result.Last);
-                    }
-                }
-                // extract NP/PP
-                ArrayList<Chunk> allChunks = new ArrayList<Chunk>();
-                repeat = true;
-                while (repeat)
-                {
-                    repeat = false;
-                    Chunk bestChunk = null;
-                    foreach (ParseTreeNode parseTreeNode in parseTreeNodes.Values.Where(
-                        x => !x.mUsed &&
-                        (x.mInLinks.Any(y => numericLinkTypes.Contains(y.First)) ||
-                        x.mInLinks.Any(y => y.First == "dol" && y.Second.mLemma.ToLower() == "biti"))))
-                    {                        
-                        Set<ParseTreeNode> tabu = new Set<ParseTreeNode>();
-                        ArrayList<Chunk> chunks = new ArrayList<Chunk>();
-                        parseTreeNode.CollectNP_PP(tabu, /*depth=*/1, chunks, null);
-                        if (chunks.Count > 0)
-                        {                            
-                            // get max depth
-                            int maxDepth = chunks.Max(x => x.mDepth);
-                            // get max len within max depth
-                            IEnumerable<Chunk> bestChunks = chunks.Where(x => x.mDepth == maxDepth).OrderByDescending(x => x.mItems.Count);
-                            Chunk firstChunk = bestChunks.First();
-                            if (bestChunk == null || firstChunk.mDepth > bestChunk.mDepth || (firstChunk.mDepth == bestChunk.mDepth && firstChunk.mItems.Count > bestChunk.mItems.Count))
-                            {
-                                bestChunk = firstChunk;
-                            }
-                        }
-                    }
-                    if (bestChunk != null)
-                    {
-                        bestChunk.mItems.ToList().ForEach(x => x.mUsed = true);
-                        repeat = true;
-                        allChunks.Add(bestChunk);
-                    }
-                }
-                w.WriteLine("NP:");
-                foreach (Chunk chunk in allChunks.Where(x => x.mType == ChunkType.NP))
-                {
-                    w.Write('\t');
-                    result.Add(chunk);
-                    w.WriteLine(chunk.ToString());
-                }
-                w.WriteLine("PP:");
-                foreach (Chunk chunk in allChunks.Where(x => x.mType == ChunkType.PP))
-                {
-                    w.Write('\t');
-                    result.Add(chunk);
-                    w.WriteLine(chunk.ToString());
-                }
-                // extract AdjP
-                repeat = true;
-                w.WriteLine("AdjP:");
-                while (repeat)
-                {
-                    repeat = false;
-                    Chunk bestChunk = null;
-                    foreach (ParseTreeNode parseTreeNode in parseTreeNodes.Values.Where(
-                        x => !x.mUsed &&
-                        (x.mInLinks.Any(y => numericLinkTypes.Contains(y.First)) ||
-                        x.mInLinks.Any(y => y.First == "dol" && y.Second.mLemma.ToLower() == "biti"))))
-                    {
-                        Set<ParseTreeNode> tabu = new Set<ParseTreeNode>();
-                        ArrayList<Chunk> chunks = new ArrayList<Chunk>();
-                        parseTreeNode.CollectAdjP(tabu, /*depth=*/1, chunks);
-                        if (chunks.Count > 0)
-                        {
-                            // get max depth
-                            int maxDepth = chunks.Max(x => x.mDepth);
-                            // get max len within max depth
-                            IEnumerable<Chunk> bestChunks = chunks.Where(x => x.mDepth == maxDepth).OrderByDescending(x => x.mItems.Count);
-                            Chunk firstChunk = bestChunks.First();
-                            if (bestChunk == null || firstChunk.mDepth > bestChunk.mDepth || (firstChunk.mDepth == bestChunk.mDepth && firstChunk.mItems.Count > bestChunk.mItems.Count))
-                            {
-                                bestChunk = firstChunk;
-                            }
-                        }
-                    }
-                    if (bestChunk != null)
-                    {
-                        bestChunk.mItems.ToList().ForEach(x => x.mUsed = true);
-                        repeat = true;
-                        w.Write("\t");
-                        result.Add(bestChunk);
-                        w.WriteLine(bestChunk);
-                    }
-                }
-                // extract AP
-                w.WriteLine("AP:");
-                repeat = true;
-                while (repeat)
-                {
-                    repeat = false;
-                    Set<ParseTreeNode> bestChunk = null;
-                    foreach (ParseTreeNode parseTreeNode in parseTreeNodes.Values.Where(x => !x.mUsed && x.mInLinks.Any(y => numericLinkTypes.Contains(y.First)) && x.mTag.StartsWith("R")))
-                    {                        
-                        Set<ParseTreeNode> chunkNodes = new Set<ParseTreeNode>();
-                        parseTreeNode.CollectAll(chunkNodes);
-                        if (bestChunk == null || chunkNodes.Count > bestChunk.Count) { bestChunk = chunkNodes; }
-                    }
-                    if (bestChunk != null)
-                    {
-                        bestChunk.ToList().ForEach(x => x.mUsed = true);
-                        repeat = true;
-                        w.Write("\t");
-                        result.Add(new Chunk(ChunkType.AP, bestChunk));
-                        w.WriteLine(result.Last);
-                    }
-                }
-                // extract othe chunks
-                w.WriteLine("other:");
-                repeat = true;
-                while (repeat)
-                {
-                    repeat = false;
-                    Set<ParseTreeNode> bestChunk = null;
-                    foreach (ParseTreeNode parseTreeNode in parseTreeNodes.Values.Where(x => !x.mUsed))
-                    {
-                        Set<ParseTreeNode> chunkNodes = new Set<ParseTreeNode>();
-                        parseTreeNode.CollectAll(chunkNodes);
-                        if (bestChunk == null || chunkNodes.Count > bestChunk.Count) { bestChunk = chunkNodes; }
-                    }
-                    if (bestChunk != null)
-                    {
-                        bestChunk.ToList().ForEach(x => x.mUsed = true);
-                        repeat = true;
-                        w.Write("\t");
-                        result.Add(new Chunk(ChunkType.Other, bestChunk));
-                        w.WriteLine(result.Last);
+                        w.WriteLine("\t" + chunk);
                     }
                 }
             }
-            return result;
+            return chunks;
         }
     }
 }

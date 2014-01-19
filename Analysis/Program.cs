@@ -23,14 +23,17 @@ namespace Analysis
                 // load XML
                 Console.WriteLine("Datoteka {0}...", fileName);
                 XmlDocument doc = new XmlDocument();
-                doc.Load(fileName);
+                doc.LoadXml(File.ReadAllText(fileName).Replace("xmlns=\"http://www.tei-c.org/ns/1.0\"", ""));
                 Corpus corpus = new Corpus();
                 corpus.LoadFromXmlFile(fileName, /*tagLen=*/int.MaxValue);
-                Text text = new Text(corpus, doc.SelectSingleNode("//header/naslov").InnerText, doc.SelectSingleNode("//header/blog").InnerText/*blog identifier is used as author identifier*/);
-                text.ComputeFeatures(); // compute Detextive features
+                Text text = null;
+//                Text text = new Text(corpus, doc.SelectSingleNode("//header/naslov").InnerText, doc.SelectSingleNode("//header/blog").InnerText/*blog identifier is used as author identifier*/);
+//                text.ComputeFeatures(); // compute Detextive features
                 // run chunker
                 Console.WriteLine("Razkosavam stavke (chunking)...");
                 ArrayList<Chunk> chunks = Chunker.GetChunks(doc);
+
+                return;
                 // compute features M04-M13 from Stamatatos et al.: Automatic Text Categorization in Terms of Genre and Author (2000)
                 double totalChunks = chunks.Count;
                 double[] M = new double[10];
