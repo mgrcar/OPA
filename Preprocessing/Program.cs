@@ -67,7 +67,9 @@ namespace OPA
             Console.WriteLine("Nalagam oznacevalnik...");
             PartOfSpeechTagger posTagger = new PartOfSpeechTagger(Config.PosTaggerModel, Config.LemmatizerModel);
             XmlDocument fullDoc = null;
-            foreach (string fileName in Directory.GetFiles(Config.DataFolder, "*.xml"))
+            string pattern = "*.xml";
+            if (args.Length > 0) { pattern = args[0]; }
+            foreach (string fileName in Directory.GetFiles(Config.DataFolder, pattern))
             {
                 // load text
                 Console.WriteLine("Datoteka {0}...", fileName);
