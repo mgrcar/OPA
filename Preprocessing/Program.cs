@@ -132,7 +132,9 @@ namespace OPA
                 ((XmlElement)txtNode).RemoveAttribute("fileName");
                 Console.WriteLine("Datoteka {0}...", fileName);
                 XmlDocument tmpDoc = new XmlDocument();
-                tmpDoc.Load(fileName);
+                string xml = File.ReadAllText(fileName);
+                xml = xml.Replace("// ]]>", "").Replace("//--><!]]>", "");
+                tmpDoc.LoadXml(xml);
                 // insert input XML into TEI-XML
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml("<TEI>" + txtNode.OuterXml + "</TEI>");

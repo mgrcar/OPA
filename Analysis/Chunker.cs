@@ -1,7 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Xml;
 using System.IO;
+using System.Text.RegularExpressions;
 using Latino;
 
 namespace Analysis
@@ -46,13 +48,21 @@ namespace Analysis
 
     public enum ChunkType
     {
-        VP,
-        NP,
-        PP,
-        AdjP,
-        AP,
-        CON,
-        Other
+        VP = 1,
+        NP = 2,
+        PP = 3,
+        AdjP = 4,
+        AP = 5,
+        CON = 6,
+        Other = 7,
+        // other (add 7)
+        Other_VP = 8,
+        Other_NP = 9,
+        Other_PP = 10,
+        Other_AdjP = 11,
+        Other_AP = 12,
+        Other_CON = 13,
+        Other_Other = 14
     }
 
     public class Chunk
@@ -61,14 +71,15 @@ namespace Analysis
         public ArrayList<ParseTreeNode> mItems;
         public int mDepth = -1;
 
-        public Chunk(ChunkType type) : this(type, new ParseTreeNode[] { })
+        public Chunk(ChunkType type, bool other) : this(type, new ParseTreeNode[] { }, other)
         {
         }
 
-        public Chunk(ChunkType type, IEnumerable<ParseTreeNode> items)
+        public Chunk(ChunkType type, IEnumerable<ParseTreeNode> items, bool other)
         {
             mType = type;
             mItems = new ArrayList<ParseTreeNode>(items);
+            if (other) { mType = (ChunkType)((int)mType + 7); }
         }
 
         public override string ToString()
@@ -83,21 +94,31 @@ namespace Analysis
             }
             return chunkStr;
         }
-    
     }
 
     public static class Chunker
     {
-        static StreamWriter w = new StreamWriter(@"C:\Users\Administrator\Desktop\chunkerV2.txt");
+        static StreamWriter w = new StreamWriter(@"C:\Users\Administrator\Desktop\chunkerV6.txt");
 
-        public static void CreateChunksDfs(ParseTreeNode node, string rel, Set<ParseTreeNode> tabu, ArrayList<Chunk> chunks)
+        private static bool NoCut(ParseTreeNode node, ParseTreeNode prev, string rel)
+        {
+            if (prev != null)
+            {
+                return 
+                    (rel == "ena" && prev.mTag.StartsWith("G") && Regex.Match(node.mTag, "^G..n").Success && prev.mOutLinks.Any(x => x.First == "tri" && x.Second.mTag.StartsWith("R"))) ||
+                    (rel == "tri" && prev.mTag.StartsWith("G") && node.mTag.StartsWith("R") && prev.mOutLinks.Any(x => x.First == "ena" && Regex.Match(x.Second.mTag, "^G..n").Success));
+            }
+            return false;
+        }
+
+        private static void CreateChunksDfs(ParseTreeNode node, ParseTreeNode prev, string rel, Set<ParseTreeNode> tabu, ArrayList<Chunk> chunks, bool other)
         {
             tabu.Add(node);
             foreach (Pair<string, ParseTreeNode> childInfo in node.mOutLinks)
             {
                 if (!tabu.Contains(childInfo.Second))
                 {
-                    CreateChunksDfs(childInfo.Second, childInfo.First, tabu, chunks);
+                    CreateChunksDfs(childInfo.Second, node, childInfo.First, tabu, chunks, other);
                 }
             }
             // check if we should cut here
@@ -109,25 +130,27 @@ namespace Analysis
                 Set<ParseTreeNode> nodes = new Set<ParseTreeNode>();
                 node.CollectAll(nodes, tabu);
                 //Console.WriteLine("Found CON: " + new Chunk(ChunkType.CON, nodes));
-                chunks.Add(new Chunk(ChunkType.CON, nodes));
+                chunks.Add(new Chunk(ChunkType.CON, nodes, other));
                 return;
             }
             // if I came here via "modra", "1", "2", "3", "4", "dol", or "prir" ...
-            else if (linksToCut.Contains(rel)) 
+            else if (linksToCut.Contains(rel) && !NoCut(node, prev, rel)) 
             {
-                // ... and this node is "G" or "Pd" ...
-                if (node.mTag.StartsWith("G") || node.mTag.StartsWith("Pd"))
+                // ... and this node is "G" ...
+                if (node.mTag.StartsWith("G") || (node.mTag.StartsWith("Pd") && rel == "dol" && prev != null && prev.mLemma == "biti"))
                 {
                     // ... then the subtree starting at this node is VP
                     Set<ParseTreeNode> nodes = new Set<ParseTreeNode>();
                     node.CollectAll(nodes, tabu);
                     //Console.WriteLine("Found VP: " + new Chunk(ChunkType.VP, nodes));
-                    chunks.Add(new Chunk(ChunkType.VP, nodes));
+                    chunks.Add(new Chunk(ChunkType.VP, nodes, other));
                     return;
                 }
                 // ... and this node is "P", "R", "S", "K", or "Z" ...
-                else if (node.mTag.StartsWith("P") || node.mTag.StartsWith("R") || node.mTag.StartsWith("S") || node.mTag.StartsWith("K") || node.mTag.StartsWith("Z"))
-                { 
+                else if ((node.mTag.StartsWith("P") || node.mTag.StartsWith("R") || node.mTag.StartsWith("S") || node.mTag.StartsWith("K") || node.mTag.StartsWith("Z"))
+                    && (rel != "dol" || (prev != null && prev.mLemma == "biti" && prev.mTag.StartsWith("G")))
+                    )
+                {
                     // ... then the subtree starting at this node is AP, AdjP, NP, or PP
                     // * PP: as soon as there's D in the subtree
                     // * AP: no D in the subtree & this node is R
@@ -136,21 +159,56 @@ namespace Analysis
                     Set<ParseTreeNode> nodes = new Set<ParseTreeNode>();
                     node.CollectAll(nodes, tabu);
                     ChunkType chunkType = ChunkType.NP;
-                    if (nodes.Any(x => x.mTag.StartsWith("D"))) 
-                    { 
-                        chunkType = ChunkType.PP; 
+                    //if (nodes.Any(x => x.mTag.StartsWith("D")))
+                    if (node.mOutLinks.Any(x => x.Second.mTag.StartsWith("D")))
+                    {
+                        chunkType = ChunkType.PP;
                     }
                     else
                     {
                         if (node.mTag.StartsWith("R")) { chunkType = ChunkType.AP; }
-                        else if (node.mTag.StartsWith("P")) { chunkType = ChunkType.AdjP; }
+                        else if (node.mTag.StartsWith("P") || node.mTag.StartsWith("Kv")) { chunkType = ChunkType.AdjP; }
                     }
                     //Console.WriteLine("Found " + chunkType + ": " + new Chunk(chunkType, nodes));
-                    chunks.Add(new Chunk(chunkType, nodes));
+                    chunks.Add(new Chunk(chunkType, nodes, other));
                     return;
                 }
             }
             tabu.Remove(node);
+        }
+
+        private static ChunkType GetSingleNodeChunkType(ParseTreeNode node)
+        {
+            switch (node.mTag[0])
+            {
+                case 'S': // samostalnik
+                    return ChunkType.NP;
+                case 'G': // glagol
+                    return ChunkType.VP;
+                case 'P': // pridevnik
+                    return ChunkType.AdjP;
+                case 'R': // prislov
+                    return ChunkType.AP;
+                case 'Z': // zaimek
+                    return ChunkType.NP;
+                case 'K': // števnik
+                    if (node.mTag.StartsWith("Kv")) { return ChunkType.AdjP; }
+                    else { return ChunkType.NP; }
+                case 'D': // predlog
+                    return ChunkType.PP;
+                case 'V': // veznik
+                    return ChunkType.CON;
+                case 'L': // členek
+                    return ChunkType.AP;
+                case 'M': // medmet
+                    return ChunkType.Other;
+                case 'O': // okrajšava
+                    return ChunkType.NP;
+                case 'N': // neuvrščeno
+                    return ChunkType.Other;
+                default:
+                    return ChunkType.Other;
+            }
         }
 
         public static ArrayList<Chunk> GetChunks(XmlDocument xmlDoc)
@@ -158,7 +216,7 @@ namespace Analysis
             ArrayList<Chunk> chunks = new ArrayList<Chunk>();
             XmlNodeList nodes = xmlDoc.SelectNodes("//text/body//p/s");
             MultiSet<string> stats = new MultiSet<string>();
-            foreach (XmlNode node in nodes) // for each sentence...
+            foreach (XmlNode node in nodes) // for each sentence ...
             {
                 // read word data
                 int seqNum = 1;
@@ -195,25 +253,43 @@ namespace Analysis
                         }
                         continue;
                     }                    
-                    if (parseTreeNodes.ContainsKey(fromNodeId) && parseTreeNodes.ContainsKey(toNodeId)) // *** sometimes these things are punctuations - are these parser errors?
+                    if (parseTreeNodes.ContainsKey(fromNodeId) && parseTreeNodes.ContainsKey(toNodeId)) // *** sometimes these things are punctuations - parser errors?
                     {
                         ParseTreeNode fromNode = parseTreeNodes[fromNodeId];
                         ParseTreeNode toNode = parseTreeNodes[toNodeId];
                         fromNode.mOutLinks.Add(new Pair<string, ParseTreeNode>(type, toNode));
                         toNode.mInLinks.Add(new Pair<string, ParseTreeNode>(type, fromNode));
                     }
-                }                
-                // find trees pointed to by "blue"
+                }
                 ArrayList<Chunk> chunksThisSentence = new ArrayList<Chunk>();
+                // find trees pointed to by "blue"
+                Set<ParseTreeNode> tabu = new Set<ParseTreeNode>();
                 foreach (ParseTreeNode treeNode in parseTreeNodes.Values.Where(x => x.mBlue))
                 {
-                    // find chunks in a DFS manner
-                    Set<ParseTreeNode> tabu = new Set<ParseTreeNode>();                    
-                    CreateChunksDfs(treeNode, "modra", tabu, chunksThisSentence);
+                    // find chunks in a DFS manner                                        
+                    CreateChunksDfs(treeNode, /*prev=*/null, "modra", tabu, chunksThisSentence, /*other=*/false);
+                    Set<ParseTreeNode> remainingNodes = new Set<ParseTreeNode>();
+                    if (!tabu.Contains(treeNode)) // something still here ...
+                    {
+                        treeNode.CollectAll(remainingNodes, tabu);
+                        chunksThisSentence.Add(new Chunk(GetSingleNodeChunkType(treeNode), remainingNodes, /*other=*/true));
+                    }
+                }
+                // still something there?
+                foreach (ParseTreeNode treeNode in parseTreeNodes.Values.Where(x => !tabu.Contains(x)))
+                {
+                    CreateChunksDfs(treeNode, /*prev=*/null, "modra", tabu, chunksThisSentence, /*other=*/true);
+                    Set<ParseTreeNode> remainingNodes = new Set<ParseTreeNode>();
+                    if (!tabu.Contains(treeNode)) 
+                    {
+                        treeNode.CollectAll(remainingNodes, tabu);
+                        chunksThisSentence.Add(new Chunk(GetSingleNodeChunkType(treeNode), remainingNodes, /*other=*/true));
+                    }
                 }
                 chunks.AddRange(chunksThisSentence);
                 // write chunks
-                ChunkType[] types = new ChunkType[] { ChunkType.VP, ChunkType.CON, ChunkType.NP, ChunkType.PP, ChunkType.AdjP, ChunkType.AP };
+                ChunkType[] types = new ChunkType[] { ChunkType.VP, ChunkType.CON, ChunkType.NP, ChunkType.PP, ChunkType.AdjP, ChunkType.AP, /*ChunkType.Other,*/
+                    ChunkType.Other_VP, ChunkType.Other_CON, ChunkType.Other_NP, ChunkType.Other_PP, ChunkType.Other_AdjP, ChunkType.Other_AP, ChunkType.Other_Other };
                 foreach (ChunkType type in types)
                 {
                     w.WriteLine(type + ":");
