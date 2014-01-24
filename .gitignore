@@ -3,6 +3,8 @@ obj/
 *.suo
 *.bak
 Out/
+OutFinal/
+OutSample/
 All/
 Parser/
 Tmp/
