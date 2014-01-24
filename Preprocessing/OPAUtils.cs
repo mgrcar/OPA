@@ -18,6 +18,7 @@ namespace OPA
             startInfo.UseShellExecute = false;
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
             startInfo.RedirectStandardOutput = true;
+            startInfo.RedirectStandardError = true;
             Process process = Process.Start(startInfo);
             do
             {
@@ -26,6 +27,7 @@ namespace OPA
             }
             while (!process.HasExited);
             Console.Write(process.StandardOutput.ReadToEnd()); // not sure if this is needed but just in case...
+            Console.Write(process.StandardError.ReadToEnd());
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Analysis
 {
     public static class Weka
     {
-        public static void SaveArff(string[] featureNames, LabeledDataset<string, SparseVector<double>> dataset, string fileName)
+        public static void SaveArff(string[] featureNames, LabeledDataset<BlogMetaData, SparseVector<double>> dataset, ClassType classType, string fileName)
         {
             using (StreamWriter w = new StreamWriter(fileName, /*append=*/false, Encoding.ASCII))
             {
@@ -21,17 +21,20 @@ namespace Analysis
                     w.WriteLine("@ATTRIBUTE " + featureName + " NUMERIC");
                 }
                 w.Write("@ATTRIBUTE class ");
-                ArrayList<string> classes = new ArrayList<string>(((IEnumerable<LabeledExample<string, SparseVector<double>>>)dataset).Select(x => x.Label).Distinct());
+                ArrayList<string> classes = new ArrayList<string>(((IEnumerable<LabeledExample<BlogMetaData, SparseVector<double>>>)dataset).Select(x => Program.GetLabel(x.Label, classType)).Distinct());
                 w.WriteLine(classes.ToString().Replace("( ", "{").Replace(" )", "}").Replace(" ", ","));
                 w.WriteLine();
                 w.WriteLine("@DATA");
-                foreach (LabeledExample<string, SparseVector<double>> lblEx in dataset)
+                foreach (LabeledExample<BlogMetaData, SparseVector<double>> lblEx in dataset)
                 {
-                    foreach (IdxDat<double> item in lblEx.Example)
+                    foreach (string lblStr in Program.GetLabel(lblEx.Label, classType).Split(','))
                     {
-                        w.Write(item.Dat + ",");
+                        foreach (IdxDat<double> item in lblEx.Example)
+                        {
+                            w.Write(item.Dat + ",");
+                        }
+                        w.WriteLine(lblStr);
                     }
-                    w.WriteLine(lblEx.Label);
                 }
             }
         }

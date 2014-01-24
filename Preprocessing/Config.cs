@@ -20,5 +20,7 @@ namespace OPA
             = Utils.GetConfigValue("ParserModelFile", "light.model");
         public static readonly string ParserFolder
            = Utils.GetConfigValue("ParserFolder", @".").TrimEnd('\\');
+        public static readonly string JavaArgs
+           = Utils.GetConfigValue("JavaArgs", "-Xmx4g");
     }
 }

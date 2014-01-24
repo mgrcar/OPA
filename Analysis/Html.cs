@@ -11,7 +11,7 @@ namespace Analysis
     {
         public static void SaveHtml(string[] featureNames, SparseVector<double> vec, XmlDocument xmlDoc, ArrayList<Chunk> chunks, string fileName)
         {
-            Document doc = new Document("name", "");
+            Document doc = new Document(xmlDoc.SelectSingleNode("//header/naslov").InnerText, "");
             StringBuilder txt = new StringBuilder();
             XmlNodeList nodes = xmlDoc.SelectNodes("//text/body//p/s");
             foreach (XmlNode node in nodes) // for each sentence...
@@ -42,7 +42,7 @@ namespace Analysis
             txt.AppendLine();
             txt.AppendLine("Rezultat členitve:");
             txt.AppendLine();
-            foreach (ChunkType chunkType in new ChunkType[] { ChunkType.VP, ChunkType.NP, ChunkType.AdjP, ChunkType.PP, ChunkType.AP, ChunkType.CON, ChunkType.Other })
+            foreach (ChunkType chunkType in new ChunkType[] { ChunkType.VP, ChunkType.NP, ChunkType.PP, ChunkType.AP, ChunkType.CON, ChunkType.Other })
             {
                 string chunkTypeStr = chunkType.ToString();
                 if (chunkTypeStr == "Other") { chunkTypeStr = "Ostalo"; }

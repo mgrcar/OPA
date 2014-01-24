@@ -7,7 +7,7 @@ namespace Analysis
 {
     public static class Orange
     {
-        public static void SaveTab(string[] featureNames, LabeledDataset<string, SparseVector<double>> dataset, string fileName)
+        public static void SaveTab(string[] featureNames, LabeledDataset<BlogMetaData, SparseVector<double>> dataset, ClassType classType, string fileName)
         {
             using (StreamWriter w = new StreamWriter(fileName, /*append=*/false, Encoding.ASCII))
             {
@@ -26,13 +26,16 @@ namespace Analysis
                     w.Write("\t");
                 }
                 w.WriteLine("class");
-                foreach (LabeledExample<string, SparseVector<double>> lblEx in dataset)
+                foreach (LabeledExample<BlogMetaData, SparseVector<double>> lblEx in dataset)
                 {
-                    foreach (IdxDat<double> item in lblEx.Example)
+                    foreach (string lblStr in Program.GetLabel(lblEx.Label, classType).Split(','))
                     {
-                        w.Write(item.Dat + "\t");
+                        foreach (IdxDat<double> item in lblEx.Example)
+                        {
+                            w.Write(item.Dat + "\t");
+                        }
+                        w.WriteLine(lblStr);
                     }
-                    w.WriteLine(lblEx.Label);
                 }
             }
         }

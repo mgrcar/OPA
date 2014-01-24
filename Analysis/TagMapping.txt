@@ -219,6 +219,7 @@ Gp-d-ds	Gpd
 Gp-spe-n	Gpsp
 Gp-spe-d	Gpspd
 Gp-spm-n	Gpsp
+Gp-spmzd	Gpspd
 Gp-spm-d	Gpspd
 Gp-spd-n	Gpsp
 Gp-spd-d	Gpspd

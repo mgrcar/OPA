@@ -66,108 +66,117 @@ namespace OPA
             LoadBlogMetaData();
             Console.WriteLine("Nalagam oznacevalnik...");
             PartOfSpeechTagger posTagger = new PartOfSpeechTagger(Config.PosTaggerModel, Config.LemmatizerModel);
-            XmlDocument fullDoc = null;
             string pattern = "*.xml";
             if (args.Length > 0) { pattern = args[0]; }
-            foreach (string fileName in Directory.GetFiles(Config.DataFolder, pattern))
+            Queue<string> fileNames = new Queue<string>(Directory.GetFiles(Config.DataFolder, pattern));
+            while (fileNames.Count > 0)
             {
-                // load text
-                Console.WriteLine("Datoteka {0}...", fileName);
-                XmlDocument tmpDoc = new XmlDocument();
-                string xml = File.ReadAllText(fileName);
-                xml = xml.Replace("// ]]>", "").Replace("//--><!]]>", "");
-                tmpDoc.LoadXml(xml);
-                string text = tmpDoc.SelectSingleNode("//besedilo").InnerText;
-                if (text.Trim() == "") { continue; } // *** empty documents are ignored
-                Corpus corpus = new Corpus();
-                corpus.LoadFromTextSsjTokenizer(text);                
-                // tag text
-                Console.WriteLine("Oznacujem besedilo...");
-                posTagger.Tag(corpus);
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(corpus.ToString("XML-MI").Replace("xmlns=\"http://www.tei-c.org/ns/1.0\"", "")); // *** remove this f***ing namespace
-                ((XmlElement)doc.SelectSingleNode("//text")).SetAttribute("fileName", fileName);
-                // append text to fullDoc
-                if (fullDoc == null)
+                int n = 0;
+                XmlDocument fullDoc = null;
+                while (fileNames.Count > 0 && n < 300) 
                 {
-                    fullDoc = doc;
+                    n++;
+                    string fileName = fileNames.Dequeue();
+                    // load text
+                    Console.WriteLine("Datoteka {0}...", fileName);
+                    XmlDocument tmpDoc = new XmlDocument();
+                    string xml = File.ReadAllText(fileName);
+                    xml = xml.Replace("// ]]>", "").Replace("//--><!]]>", "");
+                    tmpDoc.LoadXml(xml);
+                    string text = tmpDoc.SelectSingleNode("//besedilo").InnerText;
+                    if (text.Trim() == "") { continue; } // *** empty documents are ignored
+                    Corpus corpus = new Corpus();
+                    corpus.LoadFromTextSsjTokenizer(text);
+                    // tag text
+                    Console.WriteLine("Oznacujem besedilo...");
+                    posTagger.Tag(corpus);
+                    XmlDocument doc = new XmlDocument();
+                    doc.LoadXml(corpus.ToString("XML-MI").Replace("xmlns=\"http://www.tei-c.org/ns/1.0\"", "")); // *** remove this f***ing namespace
+                    ((XmlElement)doc.SelectSingleNode("//text")).SetAttribute("fileName", fileName);
+                    // append text to fullDoc
+                    if (fullDoc == null)
+                    {
+                        fullDoc = doc;
+                    }
+                    else
+                    {
+                        XmlDocumentFragment xmlFrag = fullDoc.CreateDocumentFragment();
+                        xmlFrag.InnerXml = doc.SelectSingleNode("//text").OuterXml;
+                        fullDoc.DocumentElement.AppendChild(xmlFrag);
+                    }
+                    // check if meta-data exists
+                    //string key = tmpDoc.SelectSingleNode("//header/blog").InnerText;
+                    //if (!mBlogMetaData.ContainsKey(key))
+                    //{
+                    //    Console.WriteLine("*** Cannot find meta-data for " + key);
+                    //    return;
+                    //}
                 }
-                else
+                // save tagged text for parsing
+                Console.WriteLine("Pripravljam datoteke za razclenjevanje...");
+                Guid tmpId = Guid.NewGuid();
+                string tmpFileNameIn = Config.TmpFolder + "\\" + tmpId.ToString("N") + ".tmp";
+                string tmpFileNameOut = Config.TmpFolder + "\\" + tmpId.ToString("N") + ".out.tmp";
+                XmlWriterSettings xmlSettings = new XmlWriterSettings();
+                xmlSettings.Encoding = Encoding.UTF8;
+                xmlSettings.Indent = true;
+                using (XmlWriter w = XmlWriter.Create(tmpFileNameIn, xmlSettings))
                 {
-                    XmlDocumentFragment xmlFrag = fullDoc.CreateDocumentFragment();
-                    xmlFrag.InnerXml = doc.SelectSingleNode("//text").OuterXml;
-                    fullDoc.DocumentElement.AppendChild(xmlFrag);
+                    fullDoc.Save(w);
                 }
-                // check if meta-data exists
-                //string key = tmpDoc.SelectSingleNode("//header/blog").InnerText;
-                //if (!mBlogMetaData.ContainsKey(key))
-                //{
-                //    Console.WriteLine("*** Cannot find meta-data for " + key);
-                //    return;
-                //}
-            }
-            // save tagged text for parsing
-            Console.WriteLine("Pripravljam datoteke za razclenjevanje...");
-            Guid tmpId = Guid.NewGuid();
-            string tmpFileNameIn = Config.TmpFolder + "\\" + tmpId.ToString("N") + ".tmp";
-            string tmpFileNameOut = Config.TmpFolder + "\\" + tmpId.ToString("N") + ".out.tmp";
-            XmlWriterSettings xmlSettings = new XmlWriterSettings();
-            xmlSettings.Encoding = Encoding.UTF8;
-            xmlSettings.Indent = true;
-            using (XmlWriter w = XmlWriter.Create(tmpFileNameIn, xmlSettings))
-            {
-                fullDoc.Save(w);
-            }
-            // parse text
-            Console.WriteLine("Zaganjam razclenjevalnik...");
-            Parser.Parse(tmpFileNameIn, tmpFileNameOut);
-            // load results
-            fullDoc = new XmlDocument(); 
-            fullDoc.Load(tmpFileNameOut);
-            // create output files
-            Console.WriteLine("Pisem izhodne datoteke...");
-            foreach (XmlNode txtNode in fullDoc.SelectNodes("//text"))
-            {
-                string fileName = txtNode.Attributes["fileName"].Value;
-                ((XmlElement)txtNode).RemoveAttribute("fileName");
-                Console.WriteLine("Datoteka {0}...", fileName);
-                XmlDocument tmpDoc = new XmlDocument();
-                string xml = File.ReadAllText(fileName);
-                xml = xml.Replace("// ]]>", "").Replace("//--><!]]>", "");
-                tmpDoc.LoadXml(xml);
-                // insert input XML into TEI-XML
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml("<TEI>" + txtNode.OuterXml + "</TEI>");
-                XmlDocumentFragment docPart = doc.CreateDocumentFragment();
-                docPart.InnerXml = tmpDoc.OuterXml;
-                doc.DocumentElement.PrependChild(docPart);
-                // insert blog meta-data
-                string key = doc.SelectSingleNode("//header/blog").InnerText;
-                BlogMetaData metaData;
-                if (!mBlogMetaData.ContainsKey(key))
+                // parse text
+                Console.WriteLine("Zaganjam razclenjevalnik...");
+                //Console.WriteLine(tmpFileNameIn);
+                //Console.WriteLine(tmpFileNameOut);
+                Parser.Parse(tmpFileNameIn, tmpFileNameOut);
+                // load results
+                fullDoc = new XmlDocument(); 
+                fullDoc.Load(tmpFileNameOut);
+                // create output files
+                Console.WriteLine("Pisem izhodne datoteke...");
+                foreach (XmlNode txtNode in fullDoc.SelectNodes("//text"))
                 {
-                    Console.WriteLine("*** Ne najdem podatkov o blogu \"{0}\".", key);
-                    continue;
-                }
-                else
-                {
-                    Console.WriteLine("Vstavljam meta-podatke o blogu...");
-                    metaData = mBlogMetaData[key];
-                    XmlNode node = doc.SelectSingleNode("//header");
-                    node.AppendChild(doc.CreateElement("blogSpletniNaslov")).InnerText = metaData.mBlogUrl;
-                    node.AppendChild(doc.CreateElement("blogNaslov")).InnerText = metaData.mBlogTitle;
-                    node.AppendChild(doc.CreateElement("blogNaslovKratek")).InnerText = metaData.mBlogTitleShort;
-                    //node.AppendChild(doc.CreateElement("avtorEMail")).InnerText = metaData.mAuthorEMail;
-                    node.AppendChild(doc.CreateElement("avtorSpol")).InnerText = metaData.mAuthorGender;
-                    node.AppendChild(doc.CreateElement("avtorStarost")).InnerText = metaData.mAuthorAge;
-                    node.AppendChild(doc.CreateElement("avtorRegija")).InnerText = metaData.mAuthorLocation;
-                    node.AppendChild(doc.CreateElement("avtorIzobrazba")).InnerText = metaData.mAuthorEducation;
-                }
-                // write results
-                Console.WriteLine("Zapisujem rezultate...");
-                using (XmlWriter w = XmlWriter.Create(MakeOutputFileName(fileName), xmlSettings))
-                {
-                    doc.Save(w);
+                    string fileName = txtNode.Attributes["fileName"].Value;
+                    ((XmlElement)txtNode).RemoveAttribute("fileName");
+                    Console.WriteLine("Datoteka {0}...", fileName);
+                    XmlDocument tmpDoc = new XmlDocument();
+                    string xml = File.ReadAllText(fileName);
+                    xml = xml.Replace("// ]]>", "").Replace("//--><!]]>", "");
+                    tmpDoc.LoadXml(xml);
+                    // insert input XML into TEI-XML
+                    XmlDocument doc = new XmlDocument();
+                    doc.LoadXml("<TEI>" + txtNode.OuterXml + "</TEI>");
+                    XmlDocumentFragment docPart = doc.CreateDocumentFragment();
+                    docPart.InnerXml = tmpDoc.OuterXml;
+                    doc.DocumentElement.PrependChild(docPart);
+                    // insert blog meta-data
+                    string key = doc.SelectSingleNode("//header/blog").InnerText;
+                    BlogMetaData metaData;
+                    if (!mBlogMetaData.ContainsKey(key))
+                    {
+                        Console.WriteLine("*** Ne najdem podatkov o blogu \"{0}\".", key);
+                        continue;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Vstavljam meta-podatke o blogu...");
+                        metaData = mBlogMetaData[key];
+                        XmlNode node = doc.SelectSingleNode("//header");
+                        node.AppendChild(doc.CreateElement("blogSpletniNaslov")).InnerText = metaData.mBlogUrl;
+                        node.AppendChild(doc.CreateElement("blogNaslov")).InnerText = metaData.mBlogTitle;
+                        node.AppendChild(doc.CreateElement("blogNaslovKratek")).InnerText = metaData.mBlogTitleShort;
+                        //node.AppendChild(doc.CreateElement("avtorEMail")).InnerText = metaData.mAuthorEMail;
+                        node.AppendChild(doc.CreateElement("avtorSpol")).InnerText = metaData.mAuthorGender;
+                        node.AppendChild(doc.CreateElement("avtorStarost")).InnerText = metaData.mAuthorAge;
+                        node.AppendChild(doc.CreateElement("avtorRegija")).InnerText = metaData.mAuthorLocation;
+                        node.AppendChild(doc.CreateElement("avtorIzobrazba")).InnerText = metaData.mAuthorEducation;
+                    }
+                    // write results
+                    Console.WriteLine("Zapisujem rezultate...");
+                    using (XmlWriter w = XmlWriter.Create(MakeOutputFileName(fileName), xmlSettings))
+                    {
+                        doc.Save(w);
+                    }
                 }
             }
             // purge temp folder

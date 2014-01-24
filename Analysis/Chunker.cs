@@ -98,8 +98,9 @@ namespace Analysis
 
     public static class Chunker
     {
-        static StreamWriter w = new StreamWriter(@"C:\Users\Administrator\Desktop\chunkerV6.txt");
-
+#if TEST_CHUNKER
+        private static StreamWriter w = new StreamWriter(@"C:\Users\Administrator\Desktop\chunkerV6.txt");
+#endif 
         private static bool NoCut(ParseTreeNode node, ParseTreeNode prev, string rel)
         {
             if (prev != null)
@@ -232,6 +233,7 @@ namespace Analysis
                         );
                     parseTreeNodes.Add(parseTreeNode.mId, parseTreeNode);
                 }
+#if TEST_CHUNKER
                 w.WriteLine();
                 foreach (XmlNode wordNode in node.SelectNodes("w | c")) 
                 {
@@ -239,6 +241,7 @@ namespace Analysis
                 }
                 w.WriteLine();
                 w.WriteLine();
+#endif
                 // read parse tree
                 foreach (XmlNode linkNode in node.SelectNodes("links/link"))
                 {
@@ -287,7 +290,8 @@ namespace Analysis
                     }
                 }
                 chunks.AddRange(chunksThisSentence);
-                // write chunks
+#if TEST_CHUNKER
+                // write chunks into text file
                 ChunkType[] types = new ChunkType[] { ChunkType.VP, ChunkType.CON, ChunkType.NP, ChunkType.PP, ChunkType.AdjP, ChunkType.AP, /*ChunkType.Other,*/
                     ChunkType.Other_VP, ChunkType.Other_CON, ChunkType.Other_NP, ChunkType.Other_PP, ChunkType.Other_AdjP, ChunkType.Other_AP, ChunkType.Other_Other };
                 foreach (ChunkType type in types)
@@ -298,6 +302,7 @@ namespace Analysis
                         w.WriteLine("\t" + chunk);
                     }
                 }
+#endif
             }
             return chunks;
         }
