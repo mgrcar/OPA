@@ -22,5 +22,7 @@ namespace OPA
            = Utils.GetConfigValue("ParserFolder", @".").TrimEnd('\\');
         public static readonly string JavaArgs
            = Utils.GetConfigValue("JavaArgs", "-Xmx4g");
+        public static readonly int BatchSize
+            = Utils.GetConfigValue<int>("BatchSize", "300");
     }
 }

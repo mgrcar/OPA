@@ -69,7 +69,10 @@ namespace Analysis
     {
         public ChunkType mType;
         public ArrayList<ParseTreeNode> mItems;
-        public int mDepth = -1;
+        public int mDepth 
+            = -1;
+        public bool mInner
+            = false;
 
         public Chunk(ChunkType type, bool other) : this(type, new ParseTreeNode[] { }, other)
         {
@@ -112,6 +115,65 @@ namespace Analysis
             return false;
         }
 
+        private static void CreateChunksDfsInner(ParseTreeNode root, Set<ParseTreeNode> tabuRoot, ParseTreeNode node, string rel, Set<ParseTreeNode> tabu, ArrayList<Chunk> chunks)
+        {
+            tabu.Add(node);
+            foreach (Pair<string, ParseTreeNode> childInfo in node.mOutLinks)
+            {
+                if (!tabu.Contains(childInfo.Second))
+                {
+                    CreateChunksDfsInner(root, tabuRoot, childInfo.Second, childInfo.First, tabu, chunks);
+                }
+            }
+            // check if we should cut here
+            if ((node.mTag.StartsWith("P") || node.mTag.StartsWith("R") || node.mTag.StartsWith("S") || node.mTag.StartsWith("K") || node.mTag.StartsWith("Z")) && rel == "dol" &&
+                root != node)
+            {
+                // get the "lower" chunk
+                Set<ParseTreeNode> nodesLower = new Set<ParseTreeNode>();
+                Set<ParseTreeNode> tabuCopy = tabu.Clone();
+                node.CollectAll(nodesLower, tabuCopy);
+                ChunkType chunkType = ChunkType.NP;
+                if (node.mOutLinks.Any(x => x.Second.mTag.StartsWith("D") && nodesLower.Contains(x.Second)))
+                {
+                    chunkType = ChunkType.PP;
+                }
+                else
+                {
+                    if (node.mTag.StartsWith("R")) { chunkType = ChunkType.AP; }
+                    else if (node.mTag.StartsWith("P") || node.mTag.StartsWith("Kv")) { chunkType = ChunkType.AdjP; }
+                }
+                chunks.Add(new Chunk(chunkType, nodesLower, /*other=*/false));
+                Console.WriteLine(chunks.Last);
+                chunks.Last.mInner = true;
+                // split recursively
+                CreateChunksDfsInner(node, tabu, node, rel, tabu.Clone(), chunks);
+                // get the "upper" chunk
+                Set<ParseTreeNode> nodesUpper = new Set<ParseTreeNode>();
+                tabuCopy = tabuRoot.Clone();
+                tabuCopy.AddRange(nodesLower);
+                root.CollectAll(nodesUpper, tabuCopy);
+                chunkType = ChunkType.NP;
+                if (root.mOutLinks.Any(x => x.Second.mTag.StartsWith("D") && nodesUpper.Contains(x.Second)))
+                {
+                    chunkType = ChunkType.PP;
+                }
+                else
+                {
+                    if (root.mTag.StartsWith("R")) { chunkType = ChunkType.AP; }
+                    else if (root.mTag.StartsWith("P") || root.mTag.StartsWith("Kv")) { chunkType = ChunkType.AdjP; }
+                }
+                chunks.Add(new Chunk(chunkType, nodesUpper, /*other=*/false));
+                Console.WriteLine(chunks.Last);
+                chunks.Last.mInner = true;
+                // split recursively
+                tabuCopy = tabuRoot.Clone();
+                tabuCopy.AddRange(nodesLower);
+                CreateChunksDfsInner(root, tabuCopy, root, rel, tabuCopy.Clone(), chunks);
+            }
+            tabu.Remove(node);
+        }
+
         private static void CreateChunksDfs(ParseTreeNode node, ParseTreeNode prev, string rel, Set<ParseTreeNode> tabu, ArrayList<Chunk> chunks, bool other)
         {
             tabu.Add(node);
@@ -130,7 +192,6 @@ namespace Analysis
                 // ... then the subtree starting at this node is CON
                 Set<ParseTreeNode> nodes = new Set<ParseTreeNode>();
                 node.CollectAll(nodes, tabu);
-                //Console.WriteLine("Found CON: " + new Chunk(ChunkType.CON, nodes));
                 chunks.Add(new Chunk(ChunkType.CON, nodes, other));
                 return;
             }
@@ -138,12 +199,11 @@ namespace Analysis
             else if (linksToCut.Contains(rel) && !NoCut(node, prev, rel)) 
             {
                 // ... and this node is "G" ...
-                if (node.mTag.StartsWith("G") || (node.mTag.StartsWith("Pd") && rel == "dol" && prev != null && prev.mLemma == "biti"))
+                if (node.mTag.StartsWith("G") || (node.mTag.StartsWith("Pd") && rel == "dol" && prev != null && prev.mLemma == "biti" && prev.mTag.StartsWith("G")))
                 {
                     // ... then the subtree starting at this node is VP
                     Set<ParseTreeNode> nodes = new Set<ParseTreeNode>();
                     node.CollectAll(nodes, tabu);
-                    //Console.WriteLine("Found VP: " + new Chunk(ChunkType.VP, nodes));
                     chunks.Add(new Chunk(ChunkType.VP, nodes, other));
                     return;
                 }
@@ -158,9 +218,9 @@ namespace Analysis
                     // * AdjP: no D in the subtree & this node is P
                     // * NP: no D in the subtree & this node is S, K, or Z
                     Set<ParseTreeNode> nodes = new Set<ParseTreeNode>();
+                    Set<ParseTreeNode> tabuCopy = tabu.Clone();
                     node.CollectAll(nodes, tabu);
                     ChunkType chunkType = ChunkType.NP;
-                    //if (nodes.Any(x => x.mTag.StartsWith("D")))
                     if (node.mOutLinks.Any(x => x.Second.mTag.StartsWith("D")))
                     {
                         chunkType = ChunkType.PP;
@@ -170,8 +230,9 @@ namespace Analysis
                         if (node.mTag.StartsWith("R")) { chunkType = ChunkType.AP; }
                         else if (node.mTag.StartsWith("P") || node.mTag.StartsWith("Kv")) { chunkType = ChunkType.AdjP; }
                     }
-                    //Console.WriteLine("Found " + chunkType + ": " + new Chunk(chunkType, nodes));
                     chunks.Add(new Chunk(chunkType, nodes, other));
+                    // find other potential chunks within this chunk
+                    //CreateChunksDfsInner(node, tabuCopy, node, rel, tabuCopy.Clone(), chunks);
                     return;
                 }
             }
@@ -299,7 +360,7 @@ namespace Analysis
                     w.WriteLine(type + ":");
                     foreach (Chunk chunk in chunksThisSentence.Where(x => x.mType == type))
                     {
-                        w.WriteLine("\t" + chunk);
+                        w.WriteLine("\t" + chunk + (chunk.mInner ? "*" : ""));
                     }
                 }
 #endif

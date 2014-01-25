@@ -21,13 +21,13 @@ namespace Analysis
                     w.WriteLine("@ATTRIBUTE " + featureName + " NUMERIC");
                 }
                 w.Write("@ATTRIBUTE class ");
-                ArrayList<string> classes = new ArrayList<string>(((IEnumerable<LabeledExample<BlogMetaData, SparseVector<double>>>)dataset).Select(x => Program.GetLabel(x.Label, classType)).Distinct());
+                ArrayList<string> classes = new ArrayList<string>(((IEnumerable<LabeledExample<BlogMetaData, SparseVector<double>>>)dataset).Select(x => AnalysisUtils.GetLabel(x.Label, classType)).Distinct());
                 w.WriteLine(classes.ToString().Replace("( ", "{").Replace(" )", "}").Replace(" ", ","));
                 w.WriteLine();
                 w.WriteLine("@DATA");
                 foreach (LabeledExample<BlogMetaData, SparseVector<double>> lblEx in dataset)
                 {
-                    foreach (string lblStr in Program.GetLabel(lblEx.Label, classType).Split(','))
+                    foreach (string lblStr in AnalysisUtils.GetLabel(lblEx.Label, classType).Split(','))
                     {
                         foreach (IdxDat<double> item in lblEx.Example)
                         {

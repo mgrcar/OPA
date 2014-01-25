@@ -1,6 +1,4 @@
 Unable to process:
 
-* libertarec - data missing?
-* vovkonanetu - unable to parse sentence 2724
-* ratoncrack - unable to parse sentence 1424
-* kruhinvino - unable to parse sentence 68
+* libertarec - data missing? Yes - no problem to skip this one
+* kruhinvino - unable to parse (TODO: parse 10 by 10??)

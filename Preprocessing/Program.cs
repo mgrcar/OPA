@@ -36,6 +36,15 @@ namespace OPA
             return string.Format(outputFolder + outputFileNameFormat);
         }
 
+        static void LockFile(string fileName)
+        {
+            string lockFileName = MakeOutputFileName(fileName) + ".locked";
+            using (StreamWriter w = new StreamWriter(lockFileName))
+            {
+                w.Write("LOCKED"); 
+            }
+        }
+
         static void LoadBlogMetaData()
         {
             string fileName = Config.BlogMetaDataFile;
@@ -73,10 +82,19 @@ namespace OPA
             {
                 int n = 0;
                 XmlDocument fullDoc = null;
-                while (fileNames.Count > 0 && n < 300) 
-                {
-                    n++;
+                while (fileNames.Count > 0 && n < Config.BatchSize) 
+                {                    
                     string fileName = fileNames.Dequeue();
+                    if (File.Exists(MakeOutputFileName(fileName))) 
+                    {
+                        Console.WriteLine("Ze obdelano: {0}.", fileName);
+                        continue; 
+                    }
+                    if (File.Exists(MakeOutputFileName(fileName) + ".locked"))
+                    {
+                        Console.WriteLine("Zaklenjeno: {0}.", fileName);
+                        continue;
+                    }     
                     // load text
                     Console.WriteLine("Datoteka {0}...", fileName);
                     XmlDocument tmpDoc = new XmlDocument();
@@ -104,6 +122,7 @@ namespace OPA
                         xmlFrag.InnerXml = doc.SelectSingleNode("//text").OuterXml;
                         fullDoc.DocumentElement.AppendChild(xmlFrag);
                     }
+                    n++;
                     // check if meta-data exists
                     //string key = tmpDoc.SelectSingleNode("//header/blog").InnerText;
                     //if (!mBlogMetaData.ContainsKey(key))
@@ -126,11 +145,15 @@ namespace OPA
                 }
                 // parse text
                 Console.WriteLine("Zaganjam razclenjevalnik...");
-                //Console.WriteLine(tmpFileNameIn);
-                //Console.WriteLine(tmpFileNameOut);
                 Parser.Parse(tmpFileNameIn, tmpFileNameOut);
                 // load results
-                fullDoc = new XmlDocument(); 
+                if (!File.Exists(tmpFileNameOut))
+                {
+                    // lock files and continue
+                    fullDoc.SelectNodes("//text").Cast<XmlElement>().ToList().ForEach(x => LockFile(x.Attributes["fileName"].Value));
+                    continue;
+                }
+                fullDoc = new XmlDocument();
                 fullDoc.Load(tmpFileNameOut);
                 // create output files
                 Console.WriteLine("Pisem izhodne datoteke...");

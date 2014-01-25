@@ -28,7 +28,7 @@ namespace Analysis
                 w.WriteLine("class");
                 foreach (LabeledExample<BlogMetaData, SparseVector<double>> lblEx in dataset)
                 {
-                    foreach (string lblStr in Program.GetLabel(lblEx.Label, classType).Split(','))
+                    foreach (string lblStr in AnalysisUtils.GetLabel(lblEx.Label, classType).Split(','))
                     {
                         foreach (IdxDat<double> item in lblEx.Example)
                         {

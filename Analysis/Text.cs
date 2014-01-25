@@ -129,8 +129,8 @@ namespace Analysis // taken from Detextive
 
     public class Text
     {
-        public static Dictionary<string, string> mTagMapping
-            = new Dictionary<string, string>();
+        //public static Dictionary<string, string> mTagMapping
+        //    = new Dictionary<string, string>();
         public string mName;
         public string mAuthor;
         public ArrayList<Sentence> mSentences
@@ -146,18 +146,18 @@ namespace Analysis // taken from Detextive
 
         static Text()
         {
-            using (Stream s = Utils.GetManifestResourceStream(typeof(Token), "TagMapping.txt"))
-            {
-                using (StreamReader r = new StreamReader(s))
-                {
-                    string line;
-                    while ((line = r.ReadLine()) != null)
-                    {
-                        string[] mapping = line.Split('\t');
-                        mTagMapping.Add(mapping[0], mapping[1]);
-                    }
-                }
-            }
+            //using (Stream s = Utils.GetManifestResourceStream(typeof(Token), "TagMapping.txt"))
+            //{
+            //    using (StreamReader r = new StreamReader(s))
+            //    {
+            //        string line;
+            //        while ((line = r.ReadLine()) != null)
+            //        {
+            //            string[] mapping = line.Split('\t');
+            //            mTagMapping.Add(mapping[0], mapping[1]);
+            //        }
+            //    }
+            //}
         }
 
         public Text(Corpus corpus, string name, string author)
@@ -183,7 +183,7 @@ namespace Analysis // taken from Detextive
                     token.mTokenStr = taggedWord.Word;
                     token.mLemma = taggedWord.Lemma;
                     token.mTag = tag;
-                    token.mTagReduced = mTagMapping[tag];
+                    token.mTagReduced = tag; // mTagMapping[tag]; // *** this is not used
                 }
                 if (taggedWord.MoreInfo.FollowedBySpace)
                 {
