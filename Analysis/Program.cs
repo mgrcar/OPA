@@ -10,7 +10,7 @@ using Latino.Model;
 using Latino.Model.Eval;
 using PosTagger;
 
-namespace Analysis
+namespace OPA.Analysis
 {
     public static class Program
     {
@@ -152,10 +152,6 @@ namespace Analysis
                 Weka.SaveArff(featureNames, dataset, classType, Config.OutputFolder + "\\" + string.Format("OPA-{0}.arff", classType));
                 Orange.SaveTab(featureNames, dataset, classType, Config.OutputFolder + "\\" + string.Format("OPA-{0}.tab", classType));
             }
-            //foreach (IdxDat<double> item in ReliefF.ComputeReliefF(dataset, dataset.Count, /*k=*/10).OrderByDescending(x => x.Dat))
-            //{
-            //    Console.WriteLine(featureNames[item.Idx] + " " + item.Dat);
-            //}
             // evaluate features via classification
             Console.WriteLine("Evalviram znacilke s klasifikacijskimi modeli...");
             PerfData<string> perfData = new PerfData<string>();

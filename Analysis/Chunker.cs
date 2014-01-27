@@ -6,7 +6,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Latino;
 
-namespace Analysis
+namespace OPA.Analysis
 {
     public class ParseTreeNode
     {

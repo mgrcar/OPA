@@ -8,7 +8,7 @@
     <ProjectGuid>{CD1A6987-2C69-4758-8F95-069AC4C11B1F}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OPA</RootNamespace>
+    <RootNamespace>OPA.Preprocessing</RootNamespace>
     <AssemblyName>OPA</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>
@@ -58,7 +58,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
-    <Compile Include="OPAUtils.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

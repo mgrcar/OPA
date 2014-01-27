@@ -1,6 +1,16 @@
-﻿using Latino;
+﻿/*==========================================================================;
+ *
+ *  File:    Config.cs
+ *  Desc:    Configuration setting from App.config
+ *  Created: Jan-2014
+ *
+ *  Author:  Miha Grcar
+ *
+ ***************************************************************************/
 
-namespace OPA
+using Latino;
+
+namespace OPA.Preprocessing
 {
     public static class Config
     {

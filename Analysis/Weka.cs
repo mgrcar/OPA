@@ -6,7 +6,7 @@ using System.Text;
 using Latino;
 using Latino.Model;
 
-namespace Analysis
+namespace OPA.Analysis
 {
     public static class Weka
     {
@@ -21,7 +21,10 @@ namespace Analysis
                     w.WriteLine("@ATTRIBUTE " + featureName + " NUMERIC");
                 }
                 w.Write("@ATTRIBUTE class ");
-                ArrayList<string> classes = new ArrayList<string>(((IEnumerable<LabeledExample<BlogMetaData, SparseVector<double>>>)dataset).Select(x => AnalysisUtils.GetLabel(x.Label, classType)).Distinct());
+                ArrayList<string> classes = new ArrayList<string>(((IEnumerable<LabeledExample<BlogMetaData, SparseVector<double>>>)dataset)
+                    .Select(x => AnalysisUtils.GetLabel(x.Label, classType))
+                    .Where(x => x != "")
+                    .Distinct());
                 w.WriteLine(classes.ToString().Replace("( ", "{").Replace(" )", "}").Replace(" ", ","));
                 w.WriteLine();
                 w.WriteLine("@DATA");
@@ -29,11 +32,14 @@ namespace Analysis
                 {
                     foreach (string lblStr in AnalysisUtils.GetLabel(lblEx.Label, classType).Split(','))
                     {
-                        foreach (IdxDat<double> item in lblEx.Example)
+                        if (lblStr != "")
                         {
-                            w.Write(item.Dat + ",");
+                            foreach (IdxDat<double> item in lblEx.Example)
+                            {
+                                w.Write(item.Dat + ",");
+                            }
+                            w.WriteLine(lblStr);
                         }
-                        w.WriteLine(lblStr);
                     }
                 }
             }

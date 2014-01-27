@@ -1,4 +1,14 @@
-﻿using System;
+﻿/*==========================================================================;
+ *
+ *  File:    Preprocessing\Program.cs
+ *  Desc:    Text preprocessing routine
+ *  Created: Jan-2014
+ *
+ *  Author:  Miha Grcar
+ *
+ ***************************************************************************/
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
@@ -7,7 +17,7 @@ using System.Text;
 using Latino;
 using PosTagger;
 
-namespace OPA
+namespace OPA.Preprocessing
 {
     class BlogMetaData
     {
@@ -96,7 +106,7 @@ namespace OPA
                         continue;
                     }     
                     // load text
-                    Console.WriteLine("Datoteka {0}...", fileName);
+                    Console.WriteLine("Datoteka: {0}...", fileName);
                     XmlDocument tmpDoc = new XmlDocument();
                     string xml = File.ReadAllText(fileName);
                     xml = xml.Replace("// ]]>", "").Replace("//--><!]]>", "");
@@ -131,6 +141,8 @@ namespace OPA
                     //    return;
                     //}
                 }
+                // nothing to do?
+                if (fullDoc == null) { continue; }
                 // save tagged text for parsing
                 Console.WriteLine("Pripravljam datoteke za razclenjevanje...");
                 Guid tmpId = Guid.NewGuid();
@@ -150,6 +162,7 @@ namespace OPA
                 if (!File.Exists(tmpFileNameOut))
                 {
                     // lock files and continue
+                    Console.WriteLine("*** Prislo je do napake pri razclenjevanju. Nadaljujem z obdelavo.");
                     fullDoc.SelectNodes("//text").Cast<XmlElement>().ToList().ForEach(x => LockFile(x.Attributes["fileName"].Value));
                     continue;
                 }
@@ -161,7 +174,7 @@ namespace OPA
                 {
                     string fileName = txtNode.Attributes["fileName"].Value;
                     ((XmlElement)txtNode).RemoveAttribute("fileName");
-                    Console.WriteLine("Datoteka {0}...", fileName);
+                    Console.WriteLine("Datoteka: {0}...", fileName);
                     XmlDocument tmpDoc = new XmlDocument();
                     string xml = File.ReadAllText(fileName);
                     xml = xml.Replace("// ]]>", "").Replace("//--><!]]>", "");

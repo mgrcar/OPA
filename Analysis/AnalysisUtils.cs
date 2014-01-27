@@ -4,7 +4,7 @@ using System.Linq;
 using System.Diagnostics;
 using System.Threading;
 
-namespace Analysis
+namespace OPA.Analysis
 {
     public class BlogMetaData
     {

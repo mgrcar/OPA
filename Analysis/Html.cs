@@ -5,7 +5,7 @@ using System.Xml;
 using Latino;
 using Latino.Workflows.TextMining;
 
-namespace Analysis
+namespace OPA.Analysis
 {
     public static class Html
     {

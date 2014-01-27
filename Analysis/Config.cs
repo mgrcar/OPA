@@ -1,6 +1,16 @@
-﻿using Latino;
+﻿/*==========================================================================;
+ *
+ *  File:    Config.cs
+ *  Desc:    Configuration setting from App.config
+ *  Created: Jan-2014
+ *
+ *  Author:  Miha Grcar
+ *
+ ***************************************************************************/
 
-namespace Analysis
+using Latino;
+
+namespace OPA.Analysis
 {
     public static class Config
     {

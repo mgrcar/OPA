@@ -1,10 +1,13 @@
-﻿using System;
+﻿//
+// taken from Detextive
+//
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Latino;
 
-namespace Analysis // taken from Detextive
+namespace OPA.Analysis 
 {
     public static class Features
     {

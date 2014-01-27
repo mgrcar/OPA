@@ -1,4 +1,7 @@
-﻿using System;
+﻿//
+// taken from Detextive
+//
+using System;
 using System.Linq;
 using System.Text;
 using System.Web;
@@ -9,7 +12,7 @@ using Latino.Model;
 using Latino.TextMining;
 using PosTagger;
 
-namespace Analysis // taken from Detextive
+namespace OPA.Analysis 
 {
     public class Token
     {

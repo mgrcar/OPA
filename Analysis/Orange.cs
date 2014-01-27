@@ -3,7 +3,7 @@ using System.IO;
 using Latino;
 using Latino.Model;
 
-namespace Analysis
+namespace OPA.Analysis
 {
     public static class Orange
     {
@@ -30,11 +30,14 @@ namespace Analysis
                 {
                     foreach (string lblStr in AnalysisUtils.GetLabel(lblEx.Label, classType).Split(','))
                     {
-                        foreach (IdxDat<double> item in lblEx.Example)
+                        if (lblStr != "")
                         {
-                            w.Write(item.Dat + "\t");
+                            foreach (IdxDat<double> item in lblEx.Example)
+                            {
+                                w.Write(item.Dat + "\t");
+                            }
+                            w.WriteLine(lblStr);
                         }
-                        w.WriteLine(lblStr);
                     }
                 }
             }
