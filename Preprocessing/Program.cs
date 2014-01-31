@@ -112,7 +112,11 @@ namespace OPA.Preprocessing
                     xml = xml.Replace("// ]]>", "").Replace("//--><!]]>", "");
                     tmpDoc.LoadXml(xml);
                     string text = tmpDoc.SelectSingleNode("//besedilo").InnerText;
-                    if (text.Trim() == "") { continue; } // *** empty documents are ignored
+                    if (text.Trim() == "") // *** empty documents are ignored
+                    {
+                        Console.WriteLine("*** Datoteka ne vsebuje besedila.");
+                        continue; 
+                    } 
                     Corpus corpus = new Corpus();
                     corpus.LoadFromTextSsjTokenizer(text);
                     // tag text
@@ -146,8 +150,8 @@ namespace OPA.Preprocessing
                 // save tagged text for parsing
                 Console.WriteLine("Pripravljam datoteke za razclenjevanje...");
                 Guid tmpId = Guid.NewGuid();
-                string tmpFileNameIn = Config.TmpFolder + "\\" + tmpId.ToString("N") + ".tmp";
-                string tmpFileNameOut = Config.TmpFolder + "\\" + tmpId.ToString("N") + ".out.tmp";
+                string tmpFileNameIn = new FileInfo(Config.TmpFolder + "\\" + tmpId.ToString("N") + ".tmp").FullName;
+                string tmpFileNameOut = new FileInfo(Config.TmpFolder + "\\" + tmpId.ToString("N") + ".out.tmp").FullName;
                 XmlWriterSettings xmlSettings = new XmlWriterSettings();
                 xmlSettings.Encoding = Encoding.UTF8;
                 xmlSettings.Indent = true;

@@ -9,6 +9,7 @@
  ***************************************************************************/
 
 using System;
+using System.IO;
 using System.Diagnostics;
 using System.Threading;
 
@@ -42,10 +43,10 @@ namespace OPA.Preprocessing
 
         public static void Parse(string inFileName, string outFileName)
         {
-            Console.WriteLine("Ukaz: -jar {3} DependencyParser.jar -parse -input_type:tagged_xml -not_parsed_input_file:{0} -parser_model:{2} -parsed_output_xml:{1}", 
-                inFileName, outFileName, Config.ParserModelFile, Config.JavaArgs);
-            ExecuteProcess(Config.ParserFolder, "java", string.Format("-jar {3} DependencyParser.jar -parse -input_type:tagged_xml -not_parsed_input_file:{0} -parser_model:{2} -parsed_output_xml:{1}",
-                inFileName, outFileName, Config.ParserModelFile, Config.JavaArgs));
+            Console.WriteLine("Ukaz: -jar {3} DependencyParser.jar -parse -input_type:tagged_xml \"-not_parsed_input_file:{0}\" \"-parser_model:{2}\" \"-parsed_output_xml:{1}\"", 
+                inFileName, outFileName, new FileInfo(Config.ParserModelFile).FullName, Config.JavaArgs);
+            ExecuteProcess(Config.ParserFolder, "java", string.Format("-jar {3} DependencyParser.jar -parse -input_type:tagged_xml \"-not_parsed_input_file:{0}\" \"-parser_model:{2}\" \"-parsed_output_xml:{1}\"",
+                inFileName, outFileName, new FileInfo(Config.ParserModelFile).FullName, Config.JavaArgs));
         }
     }
 }

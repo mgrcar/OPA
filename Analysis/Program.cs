@@ -48,9 +48,14 @@ namespace OPA.Analysis
 
         static LabeledDataset<string, SparseVector<double>> CreateSingleFeatureDataset(LabeledDataset<BlogMetaData, SparseVector<double>> srcDataset, ClassType classType, int fIdx)
         {
+            SparseVector<double> minValues, maxValues;
+            GetExtremes(srcDataset, out minValues, out maxValues);
             LabeledDataset<string, SparseVector<double>> dataset = new LabeledDataset<string, SparseVector<double>>();
             ((IEnumerable<LabeledExample<BlogMetaData, SparseVector<double>>>)srcDataset).ToList()
-                .ForEach(x => dataset.Add(new LabeledExample<string, SparseVector<double>>(AnalysisUtils.GetLabel(x.Label, classType), new SparseVector<double>(new double[] { x.Example[fIdx] }))));
+                .ForEach(x => dataset.Add(new LabeledExample<string, SparseVector<double>>(AnalysisUtils.GetLabel(x.Label, classType), 
+                    new SparseVector<double>(
+                        new double[] { (x.Example[fIdx] - minValues[fIdx]) / (maxValues[fIdx] - minValues[fIdx]) } // simple normalization
+                        ))));
             return dataset;
         }
 
@@ -69,8 +74,28 @@ namespace OPA.Analysis
             }
         }
 
+        //class ManhattanSimilarity : ISimilarity<SparseVector<double>>
+        //{
+        //    public double GetSimilarity(SparseVector<double> a, SparseVector<double> b)
+        //    {
+        //        double sum = 0;
+        //        for (int i = 0; i < a.Count; i++)
+        //        {
+        //            sum += Math.Pow(a[i] - b[i], 2);
+        //            //sum += Math.Abs(a[i] - b[i]);
+        //        }
+        //        return -sum;
+        //    }
+        //
+        //    public void Save(BinarySerializer writer)
+        //    {
+        //        DotProductSimilarity.Instance.Save(writer); // *** after loading NCC in Classify.exe, the similarity measure needs to be set to ManhattanSimilarity
+        //    }
+        //}
+
         static void Main(string[] args)
         {
+            Random rnd = new Random(1);
             string[] featureNames = "ttr,brunet,honore,hl,ttrLemma,brunetLemma,honoreLemma,hlLemma,ari,flesch,fog,rWords,rChars,rSyllables,rComplex,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13".Split(',');
             LabeledDataset<BlogMetaData, SparseVector<double>> dataset = new LabeledDataset<BlogMetaData, SparseVector<double>>();
             Console.WriteLine("Analiziram besedila...");
@@ -143,7 +168,7 @@ namespace OPA.Analysis
                 }
                 dataset.Add(new LabeledExample<BlogMetaData, SparseVector<double>>(metaData, vec));
                 string htmlFileName = Config.HtmlFolder + "\\" + Path.GetFileNameWithoutExtension(fileName) + ".html";
-                //Html.SaveHtml(featureNames, vec, doc, chunks, htmlFileName);
+                Html.SaveHtml(featureNames, vec, doc, chunks, htmlFileName);
             }
             // save as Orange and Weka file            
             Console.WriteLine("Zapisujem datoteke Weka ARFF in Orange TAB...");
@@ -159,11 +184,13 @@ namespace OPA.Analysis
             // create classifiers
             NearestCentroidClassifier<string> ncc = new NearestCentroidClassifier<string>();
             ncc.Similarity = new SingleFeatureSimilarity();
-            models.Add(new Pair<string, IModel<string>>("NCC", ncc));
-            //KnnClassifier<string, SparseVector<double>> knn = new KnnClassifier<string, SparseVector<double>>(new SingleFeatureSimilarity());
-            //models.Add(new Pair<string, IModel<string>>("kNN", knn));
-            //SvmMulticlassFast<string> svm = new SvmMulticlassFast<string>();
-            //models.Add(new Pair<string, IModel<string>>("SVM", svm));
+            models.Add(new Pair<string, IModel<string>>("NCC", ncc));            
+            KnnClassifier<string, SparseVector<double>> knn = new KnnClassifier<string, SparseVector<double>>(new SingleFeatureSimilarity());
+            //models.Add(new Pair<string, IModel<string>>("kNN", knn)); // *** kNN is too slow 
+            SvmMulticlassFast<string> svm = new SvmMulticlassFast<string>();
+            models.Add(new Pair<string, IModel<string>>("SVM", svm));
+            MajorityClassifier<string, SparseVector<double>> maj = new MajorityClassifier<string, SparseVector<double>>();
+            models.Add(new Pair<string, IModel<string>>("Majority", maj));
             MajorityClassifier<string, SparseVector<double>> backupCfy = new MajorityClassifier<string, SparseVector<double>>();
             foreach (Pair<string, IModel<string>> modelInfo in models) // iterate over different classifiers
             {
@@ -175,7 +202,7 @@ namespace OPA.Analysis
                     {
                         Console.WriteLine("Znacilka: {0}...", featureNames[fIdx]);
                         LabeledDataset<string, SparseVector<double>> datasetWithSingleFeature = CreateSingleFeatureDataset(dataset, classType, fIdx);
-                        datasetWithSingleFeature.Shuffle();
+                        datasetWithSingleFeature.Shuffle(rnd);
                         LabeledDataset<string, SparseVector<double>> trainSet, testSet;                        
                         for (int foldNum = 1; foldNum <= 10; foldNum++)
                         {
@@ -190,61 +217,123 @@ namespace OPA.Analysis
                             }
                             else
                             {
-                                model.Train(trainSet);
+                                string cacheFileName = Config.OutputFolder + "\\svm-" + classType + "-" + featureNames[fIdx] + "-" + foldNum + ".bin";
+                                if (model is SvmMulticlassFast<string> && File.Exists(cacheFileName))
+                                {
+                                    using (BinarySerializer bs = new BinarySerializer(cacheFileName, FileMode.Open))
+                                    {
+                                        ((SvmMulticlassFast<string>)model).Load(bs);
+                                    }
+                                }
+                                else
+                                {
+                                    model.Train(trainSet);
+                                }
+                                if (model is SvmMulticlassFast<string>)
+                                {
+                                    using (BinarySerializer bs = new BinarySerializer(cacheFileName, FileMode.Create))
+                                    {
+                                        model.Save(bs);
+                                    }
+                                }
                             }
                             foreach (LabeledExample<string, SparseVector<double>> lblEx in testSet)
                             {
                                 Prediction<string> pred = model.Predict(lblEx.Example);
                                 if (pred.Count == 0) { pred = backupCfy.Predict(lblEx.Example); } // if the model is unable to make a prediction, use MajorityClassifier instead
-                                perfData.GetPerfMatrix(classType.ToString(), modelInfo.First + "-" + featureNames[fIdx], foldNum).AddCount(lblEx.Label, pred.BestClassLabel);
+                                perfData.GetPerfMatrix(classType.ToString(), modelInfo.First + "\t" + featureNames[fIdx], foldNum).AddCount(lblEx.Label, pred.BestClassLabel);
                             }
                         }
                     }
                 }
             }
-#if TRAIN_FULL_MODELS
             // train full models
             Console.WriteLine("Treniram klasifikacijske modele...");
+            models.Clear();
             SvmMulticlassFast<string> svmFull = new SvmMulticlassFast<string>();
-            foreach (ClassType classType in new ClassType[] { ClassType.AuthorName, ClassType.AuthorAge, ClassType.AuthorEducation, ClassType.AuthorGender, ClassType.AuthorLocation }) // iterate over different class types
+            models.Add(new Pair<string, IModel<string>>("SVM", svmFull));
+            //NearestCentroidClassifier<string> nccFull = new NearestCentroidClassifier<string>();
+            //nccFull.Similarity = new ManhattanSimilarity();
+            //models.Add(new Pair<string, IModel<string>>("NCC", nccFull));
+            foreach (Pair<string, IModel<string>> modelInfo in models) // iterate over different classifiers
             {
-                Console.WriteLine("Ciljni razred: {0}...", classType);
-                LabeledDataset<string, SparseVector<double>> nrmDataset = CreateNormalizedDataset(dataset, classType);
-                nrmDataset.Shuffle();
-                LabeledDataset<string, SparseVector<double>> trainSet, testSet;
-                for (int foldNum = 1; foldNum <= 10; foldNum++)
+                Console.WriteLine("Kasifikacijski model: {0}...", modelInfo.First);
+                IModel<string> model = modelInfo.Second;
+                foreach (ClassType classType in new ClassType[] { ClassType.AuthorName, ClassType.AuthorAge, ClassType.AuthorEducation, ClassType.AuthorGender, ClassType.AuthorLocation }) // iterate over different class types
                 {
-                    Console.WriteLine("Sklop " + foldNum + " / 10...");
-                    nrmDataset.SplitForCrossValidation(/*numFolds=*/10, foldNum, out trainSet, out testSet);
-                    IModel<string> model = svmFull;
-                    backupCfy.Train(trainSet);
-                    // if there is only one class in trainSet, switch to MajorityClassifier
-                    if (((IEnumerable<LabeledExample<string, SparseVector<double>>>)trainSet).Select(x => x.Label).Distinct().Count() == 1)
+                    Console.WriteLine("Ciljni razred: {0}...", classType);
+                    LabeledDataset<string, SparseVector<double>> nrmDataset = CreateNormalizedDataset(dataset, classType);
+                    nrmDataset.Shuffle(rnd);
+                    LabeledDataset<string, SparseVector<double>> trainSet, testSet;
+                    for (int foldNum = 1; foldNum <= 10; foldNum++)
                     {
-                        model = backupCfy;
+                        Console.WriteLine("Sklop " + foldNum + " / 10...");
+                        nrmDataset.SplitForCrossValidation(/*numFolds=*/10, foldNum, out trainSet, out testSet);
+                        backupCfy.Train(trainSet);
+                        // if there is only one class in trainSet, switch to MajorityClassifier
+                        if (((IEnumerable<LabeledExample<string, SparseVector<double>>>)trainSet).Select(x => x.Label).Distinct().Count() == 1)
+                        {
+                            model = backupCfy;
+                        }
+                        else
+                        {
+                            string cacheFileName = Config.OutputFolder + "\\svm-" + classType + "-full-" + foldNum + ".bin";
+                            if (model is SvmMulticlassFast<string> && File.Exists(cacheFileName))
+                            {
+                                using (BinarySerializer bs = new BinarySerializer(cacheFileName, FileMode.Open))
+                                {
+                                    ((SvmMulticlassFast<string>)model).Load(bs);
+                                }
+                            }
+                            else
+                            {
+                                model.Train(trainSet);
+                            }
+                            if (model is SvmMulticlassFast<string>)
+                            {
+                                using (BinarySerializer bs = new BinarySerializer(cacheFileName, FileMode.Create))
+                                {
+                                    model.Save(bs);
+                                }
+                            }
+                        }
+                        foreach (LabeledExample<string, SparseVector<double>> lblEx in testSet)
+                        {
+                            Prediction<string> pred = model.Predict(lblEx.Example);
+                            if (pred.Count == 0) { pred = backupCfy.Predict(lblEx.Example); } // if the model is unable to make a prediction, use MajorityClassifier instead
+                            perfData.GetPerfMatrix(classType.ToString(), modelInfo.First + "\tfull", foldNum).AddCount(lblEx.Label, pred.BestClassLabel);
+                        }
                     }
-                    else
+                    // save model
+                    string modelFileName = Config.OutputFolder + "\\" + modelInfo.First + "-" + classType + ".model";
+                    if (!File.Exists(modelFileName))
                     {
-                        model.Train(trainSet);
-                    }
-                    foreach (LabeledExample<string, SparseVector<double>> lblEx in testSet)
-                    {
-                        Prediction<string> pred = model.Predict(lblEx.Example);
-                        if (pred.Count == 0) { pred = backupCfy.Predict(lblEx.Example); } // if the model is unable to make a prediction, use MajorityClassifier instead
-                        perfData.GetPerfMatrix(classType.ToString(), "SVM-full", foldNum).AddCount(lblEx.Label, pred.BestClassLabel);
+                        using (BinarySerializer bs = new BinarySerializer(modelFileName, FileMode.Create))
+                        {
+                            model.Train(nrmDataset);
+                            model.Save(bs);
+                        }
                     }
                 }
-                //break;
             }
-#endif
-            Console.WriteLine("*** Macro F1 ***");
-            Console.WriteLine(perfData.ToString(null, PerfMetric.MacroF1));
-            Console.WriteLine("*** Micro F1 ***");
-            Console.WriteLine(perfData.ToString(null, PerfMetric.MicroF1));
-            Console.WriteLine("*** Macro accuracy ***");
-            Console.WriteLine(perfData.ToString(null, PerfMetric.MacroAccuracy)); // *** I think these numbers are wrong
-            Console.WriteLine("*** Micro accuracy ***");
-            Console.WriteLine(perfData.ToString(null, PerfMetric.MicroAccuracy));
+            using (StreamWriter w = new StreamWriter(Config.OutputFolder + "\\ClassifierEval.txt"))
+            {
+                w.WriteLine("*** Macro F1 ***");
+                w.WriteLine();
+                w.WriteLine("\t" + perfData.ToString(null, PerfMetric.MacroF1));
+                w.WriteLine();
+                w.WriteLine("*** Micro F1 ***");
+                w.WriteLine();
+                w.WriteLine("\t" + perfData.ToString(null, PerfMetric.MicroF1));
+                w.WriteLine();
+                w.WriteLine("*** Macro accuracy ***");
+                w.WriteLine();
+                w.WriteLine("\t" + perfData.ToString(null, PerfMetric.MacroAccuracy));
+                w.WriteLine();
+                w.WriteLine("*** Micro accuracy ***");
+                w.WriteLine();
+                w.WriteLine("\t" + perfData.ToString(null, PerfMetric.MicroAccuracy));
+            }
             // all done
             Console.WriteLine("Koncano.");
         }
