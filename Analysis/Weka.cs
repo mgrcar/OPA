@@ -21,10 +21,10 @@ namespace OPA.Analysis
                     w.WriteLine("@ATTRIBUTE " + featureName + " NUMERIC");
                 }
                 w.Write("@ATTRIBUTE class ");
-                ArrayList<string> classes = new ArrayList<string>(((IEnumerable<LabeledExample<BlogMetaData, SparseVector<double>>>)dataset)
-                    .Select(x => AnalysisUtils.GetLabel(x.Label, classType))
-                    .Where(x => x != "")
-                    .Distinct());
+                ArrayList<string> classes = new ArrayList<string>();
+                ((IEnumerable<LabeledExample<BlogMetaData, SparseVector<double>>>)dataset).ToList().ForEach(
+                    x => classes.AddRange(AnalysisUtils.GetLabel(x.Label, classType).Split(',')));
+                classes = new ArrayList<string>(classes.Distinct());
                 w.WriteLine(classes.ToString().Replace("( ", "{").Replace(" )", "}").Replace(" ", ","));
                 w.WriteLine();
                 w.WriteLine("@DATA");
