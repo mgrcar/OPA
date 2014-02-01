@@ -33,7 +33,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;TRAIN_FULL_MODELS</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -57,16 +57,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Html.cs" />
-    <Compile Include="Orange.cs" />
     <Compile Include="Chunker.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Features.cs" />
     <Compile Include="AnalysisUtils.cs" />
+    <Compile Include="Output.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Text.cs" />
-    <Compile Include="Weka.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Latino\LatinoWorkflows\LatinoWorkflows2010.csproj">

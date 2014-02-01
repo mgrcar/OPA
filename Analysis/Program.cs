@@ -1,10 +1,18 @@
-﻿using System;
+﻿/*==========================================================================;
+ *
+ *  File:    Analysis\Program.cs
+ *  Desc:    Computes features and performs analysis
+ *  Created: Jan-2014
+ *
+ *  Author:  Miha Grcar
+ *
+ ***************************************************************************/
+
+using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.IO;
 using System.Xml;
-using System.Text;
 using Latino;
 using Latino.Model;
 using Latino.Model.Eval;
@@ -73,25 +81,6 @@ namespace OPA.Analysis
                 throw new NotImplementedException();
             }
         }
-
-        //class ManhattanSimilarity : ISimilarity<SparseVector<double>>
-        //{
-        //    public double GetSimilarity(SparseVector<double> a, SparseVector<double> b)
-        //    {
-        //        double sum = 0;
-        //        for (int i = 0; i < a.Count; i++)
-        //        {
-        //            sum += Math.Pow(a[i] - b[i], 2);
-        //            //sum += Math.Abs(a[i] - b[i]);
-        //        }
-        //        return -sum;
-        //    }
-        //
-        //    public void Save(BinarySerializer writer)
-        //    {
-        //        DotProductSimilarity.Instance.Save(writer); // *** after loading NCC in Classify.exe, the similarity measure needs to be set to ManhattanSimilarity
-        //    }
-        //}
 
         static void Main(string[] args)
         {
@@ -168,14 +157,14 @@ namespace OPA.Analysis
                 }
                 dataset.Add(new LabeledExample<BlogMetaData, SparseVector<double>>(metaData, vec));
                 string htmlFileName = Config.HtmlFolder + "\\" + Path.GetFileNameWithoutExtension(fileName) + ".html";
-                Html.SaveHtml(featureNames, vec, doc, chunks, htmlFileName);
+                Output.SaveHtml(featureNames, vec, doc, chunks, htmlFileName);
             }
             // save as Orange and Weka file            
             Console.WriteLine("Zapisujem datoteke Weka ARFF in Orange TAB...");
             foreach (ClassType classType in new ClassType[] { ClassType.AuthorName, ClassType.AuthorAge, ClassType.AuthorGender, ClassType.AuthorEducation, ClassType.AuthorLocation })
             {
-                Weka.SaveArff(featureNames, dataset, classType, Config.OutputFolder + "\\" + string.Format("OPA-{0}.arff", classType));
-                Orange.SaveTab(featureNames, dataset, classType, Config.OutputFolder + "\\" + string.Format("OPA-{0}.tab", classType));
+                Output.SaveArff(featureNames, dataset, classType, Config.OutputFolder + "\\" + string.Format("OPA-{0}.arff", classType));
+                Output.SaveTab(featureNames, dataset, classType, Config.OutputFolder + "\\" + string.Format("OPA-{0}.tab", classType));
             }
             // evaluate features via classification
             Console.WriteLine("Evalviram znacilke s klasifikacijskimi modeli...");
@@ -185,7 +174,7 @@ namespace OPA.Analysis
             NearestCentroidClassifier<string> ncc = new NearestCentroidClassifier<string>();
             ncc.Similarity = new SingleFeatureSimilarity();
             models.Add(new Pair<string, IModel<string>>("NCC", ncc));            
-            KnnClassifier<string, SparseVector<double>> knn = new KnnClassifier<string, SparseVector<double>>(new SingleFeatureSimilarity());
+            //KnnClassifier<string, SparseVector<double>> knn = new KnnClassifier<string, SparseVector<double>>(new SingleFeatureSimilarity());
             //models.Add(new Pair<string, IModel<string>>("kNN", knn)); // *** kNN is too slow 
             SvmMulticlassFast<string> svm = new SvmMulticlassFast<string>();
             models.Add(new Pair<string, IModel<string>>("SVM", svm));
@@ -229,6 +218,7 @@ namespace OPA.Analysis
                                 {
                                     model.Train(trainSet);
                                 }
+#if CACHE_MODELS
                                 if (model is SvmMulticlassFast<string>)
                                 {
                                     using (BinarySerializer bs = new BinarySerializer(cacheFileName, FileMode.Create))
@@ -236,6 +226,7 @@ namespace OPA.Analysis
                                         model.Save(bs);
                                     }
                                 }
+#endif
                             }
                             foreach (LabeledExample<string, SparseVector<double>> lblEx in testSet)
                             {
@@ -289,6 +280,7 @@ namespace OPA.Analysis
                             {
                                 model.Train(trainSet);
                             }
+#if CACHE_MODELS
                             if (model is SvmMulticlassFast<string>)
                             {
                                 using (BinarySerializer bs = new BinarySerializer(cacheFileName, FileMode.Create))
@@ -296,6 +288,7 @@ namespace OPA.Analysis
                                     model.Save(bs);
                                 }
                             }
+#endif
                         }
                         foreach (LabeledExample<string, SparseVector<double>> lblEx in testSet)
                         {

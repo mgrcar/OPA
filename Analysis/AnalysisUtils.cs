@@ -1,8 +1,16 @@
-﻿using System;
+﻿/*==========================================================================;
+ *
+ *  File:    AnalysisUtils.cs
+ *  Desc:    Various common stuff
+ *  Created: Jan-2014
+ *
+ *  Author:  Miha Grcar
+ *
+ ***************************************************************************/
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Diagnostics;
-using System.Threading;
 
 namespace OPA.Analysis
 {

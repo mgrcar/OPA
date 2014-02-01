@@ -1,4 +1,14 @@
-﻿using System;
+﻿/*==========================================================================;
+ *
+ *  File:    Chunker.cs
+ *  Desc:    Determines chunks from parse tree
+ *  Created: Jan-2014
+ *
+ *  Author:  Miha Grcar, Simon Krek
+ *
+ ***************************************************************************/
+
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Xml;
