@@ -1,12 +1,4 @@
 bin/
 obj/
 *.suo
-*.bak
-Out/
-OutFinal/
-OutSample/
-All/
-Parser/
-Tmp/
-Screencasts/analyze/
-Screencasts/prepare/
+*.bak*.user
