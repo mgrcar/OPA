@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+${Css}
+<title>${Title} - Document Viewer</title>
+</head>
+<body>
+<div class="container">
+<div class="row">
+<div class="span4">
+	<div class="sidebar">
+		<div class="sidebar-title">
+			Annotation tree
+		</div>
+		<div class="sidebar-body">
+		</div>
+	</div>
+	<div class="sidebar">
+		<div class="sidebar-title">
+			Document features
+		</div>
+		<div class="sidebar-body">
+		</div>	
+	</div>
+</div>
+<div class="span8">
+	<div class="doc">
+		<h2>${Title}</h2>
+		<div id="doc-content"></div>
+	</div>
+</div> <!--span4-->
+</div> <!--row-->
+</div> <!--container-->
+<div id="copyright"><div>&#9734;</div></div>
+${Js}
+<script type="text/javascript">
+    setTreeItems(${TreeItemsParam});
+    setFeatures(${FeaturesParam});
+    setContent(${ContentParam});
+</script>
+</body>
+</html> 

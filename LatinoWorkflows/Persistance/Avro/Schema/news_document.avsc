@@ -1,0 +1,56 @@
+{
+    "type":"record",
+    "namespace":"latino-workflows",
+    "name":"NewsDocument",
+
+    "fields":[
+        {
+            "name":"name",
+            "type":["string", "null"]
+        },
+        {
+            "name":"text",
+            "type":["string", "null"]
+        },
+        {
+            "name":"features",
+            "type":["null",
+                {
+                    "type":"map", 
+                    "values":"string"
+                }]
+        },
+        {
+            "name":"annotations",
+            "type":["null", {
+                "type":"array",
+                "items":{
+                    "type":"record",
+                    "name":"DocumentAnnotation",
+                    "fields":[
+                        {
+                            "name":"spanStart",
+                            "type":"int"
+                        },
+                        {
+                            "name":"spanEnd",
+                            "type":"int"
+                        },
+                        {
+                            "name":"type",
+                            "type":"string"
+                        },
+                        {
+                            "name":"features",
+                            "type":["null",
+                                {
+                                    "type":"map", 
+                                    "values":"string"
+                                }]
+                        }
+                    ]
+                }
+            }]
+        }
+    ]
+}

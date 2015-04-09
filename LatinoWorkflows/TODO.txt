@@ -1,0 +1,63 @@
+[x] StreamDataProducer 
+[x] Headers
+[x] Test
+[x] DocumentCorpus 
+[x] Commit
+[x] cloning of documents, annotations, document corpus
+[x] references to documents 
+[x] graceful shutdown of data producers
+[x] commit
+[x] Error checking
+[x] commit
+[x] Generic stream data producer, consumer, processor
+[x] simple data selection language for annotated documents
+[x] commit
+[x] RegexTokenizerComponent.cs
+[x] RssFeedComponent (initial ver)
+[x] Document corpus XML serialization
+[x] commit
+[x] Stop / Resume on data consumers
+[x] RssFeedComponent (RC)
+[x] commit
+[x] Document corpus XML serialization (read + test)
+[x] commit
+[x] thread safety probl. in StreamDataConsumer Stop
+[x] DocumentCorpus cloning revision
+[x] commit
+[x] logging
+[x] RSS comp.: don't parse channel attribs if no new items
+[x] remove useless using from RSS comp and dacq
+[x] test enums and serialization in latino
+[x] commit
+[x] DispatchData for data producers
+[x] logging file output
+[x] Group RSS feeds
+[x] RSS component politeness sleep
+[x] Timeouts in WebUtils
+[x] commit
+[x] GetWebPage number of retries
+[x] move log to latino, enable overriding static settings
+[x] remove jsint from Latino.Web.WebUtils 
+[x] add pubDate into history hash-key
+[x] make Dacq store history for each component separately (solved: this is now handled by RDBMS)
+[x] commit
+[x] boilerplate remover: handle comments in GetTextBlocks
+[ ] boilerplate remover: changes behavior if href changed in <a>. Should not happen (?) 
+[ ] put jsint support into LatinoWorkflows
+[x] logging of progress
+[ ] document corpus Resources -> Templates
+[/] fix URIs like http://www.bseindia.com/cirbrief/new_notice_detail.asp?Noticeid={AED515A2-ECF9-4539-988E-8D51634B5E8B}&noticeno=20110311-3&dt=03/11/2011&icount=3&totcount=9&flag=0
+    (should be http://www.bseindia.com/cirbrief/new_notice_detail.asp?Noticeid=%7bAED515A2-ECF9-4539-988E-8D51634B5E8B%7d&noticeno=20110311-3&dt=03/11/2011&icount=3&totcount=9&flag=0)
+    See http://www.ietf.org/rfc/rfc2396.txt, Section 2.2
+[/] remove illegal characters from RSS XMLs (see Dacq logs)
+	(allowed chars are #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF])
+	<< turned out that they weren't XMLs at all >>
+[/] Logging as stream component
+[/] fixed-size queue 
+[x] more powerful query language for retrieving text blocks
+[ ] handle RSS comments
+[x] DB query timeouts (solved: using write-through cache)
+[x] Can boilerplate remover handle [x]XHTML / [x]plain text?
+[x] Make filters in RSS reader to reject content of incorrect content type
+[x] Get rid of id in annotations
+[ ] commit

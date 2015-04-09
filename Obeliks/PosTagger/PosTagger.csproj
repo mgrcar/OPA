@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{915DA0E9-1BA2-4BBF-87AC-734D49B1EBFC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PosTagger</RootNamespace>
+    <AssemblyName>PosTagger</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Corpus.cs" />
+    <Compile Include="MetaTaggerData.cs" />
+    <Compile Include="PatriciaTree.cs" />
+    <Compile Include="PartOfSpeechTagger.cs" />
+    <Compile Include="Rules.cs" />
+    <Compile Include="ThreadHandler.cs" />
+    <EmbeddedResource Include="Resources\Tagger\ListKbPrefix.txt" />
+    <EmbeddedResource Include="Resources\Tagger\ListL.txt" />
+    <EmbeddedResource Include="Resources\Tagger\ListO.txt" />
+    <EmbeddedResource Include="Resources\Lemmatizer\ListPpLemma.txt" />
+    <EmbeddedResource Include="Resources\Tagger\ListZ.txt" />
+    <EmbeddedResource Include="Resources\Tagger\TagStats.txt" />
+    <EmbeddedResource Include="Resources\Tagger\ListVd.txt" />
+    <EmbeddedResource Include="Resources\Tagger\ListVp.txt" />
+    <EmbeddedResource Include="Resources\Tagger\ListDd.txt" />
+    <EmbeddedResource Include="Resources\Tagger\ListDi.txt" />
+    <EmbeddedResource Include="Resources\Tagger\ListDm.txt" />
+    <EmbeddedResource Include="Resources\Tagger\ListDo.txt" />
+    <EmbeddedResource Include="Resources\Tagger\ListDr.txt" />
+    <EmbeddedResource Include="Resources\Tagger\ListDt.txt" />
+    <EmbeddedResource Include="Resources\Lemmatizer\ListPsLemma.txt" />
+    <EmbeddedResource Include="Resources\Lemmatizer\ListSoLemma.txt" />
+    <EmbeddedResource Include="Resources\Tokenizer\ListOAll.txt" />
+    <EmbeddedResource Include="Resources\Tokenizer\ListOAllCS.txt" />
+    <EmbeddedResource Include="Resources\Tokenizer\ListOExcl.txt" />
+    <EmbeddedResource Include="Resources\Tokenizer\ListOExclCS.txt" />
+    <EmbeddedResource Include="Resources\Tokenizer\ListONoSegSeq.txt" />
+    <EmbeddedResource Include="Resources\Tokenizer\ListOSeg.txt" />
+    <EmbeddedResource Include="Resources\Tokenizer\ListOSegSeq.txt" />
+    <EmbeddedResource Include="Resources\Tokenizer\ListOSeq.txt" />
+    <EmbeddedResource Include="Resources\Tokenizer\TokRulesPart1.txt" />
+    <EmbeddedResource Include="Resources\Tokenizer\TokRulesPart2.txt" />
+    <EmbeddedResource Include="Resources\Lemmatizer\ListSuffix.txt" />
+    <EmbeddedResource Include="Resources\Tagger\TagStatsLex.txt" />
+    <EmbeddedResource Include="Resources\Tagger\TagList.txt" />
+    <EmbeddedResource Include="Resources\Tagger\WordStatsLex.txt" />
+    <EmbeddedResource Include="Resources\Tagger\ListGp.txt" />
+    <Content Include="TODO.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\LATINO\LatinoLite.csproj">
+      <Project>{5B86AAD5-3FEA-487C-A518-4F846AF09E18}</Project>
+      <Name>LatinoLite</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LemmaSharp\LemmaSharp.csproj">
+      <Project>{3283E6ED-0B50-4505-A268-4C47E8324DC8}</Project>
+      <Name>LemmaSharp</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
