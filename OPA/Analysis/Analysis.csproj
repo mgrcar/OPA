@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OPA.Analysis</RootNamespace>
     <AssemblyName>Analysis</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -67,17 +67,17 @@
     <Compile Include="Text.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Latino\LatinoWorkflows\LatinoWorkflows2010.csproj">
+    <ProjectReference Include="..\..\LatinoWorkflows\LatinoWorkflows.csproj">
       <Project>{EDE88AFF-1053-4175-B91C-4E683426706A}</Project>
-      <Name>LatinoWorkflows2010</Name>
+      <Name>LatinoWorkflows</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Latino\Latino\Latino.csproj">
+    <ProjectReference Include="..\..\Latino\LatinoLite.csproj">
       <Project>{5B86AAD5-3FEA-487C-A518-4F846AF09E18}</Project>
-      <Name>Latino</Name>
+      <Name>LatinoLite</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Obeliks\Obeliks\PosTagger\PosTagger2010.csproj">
+    <ProjectReference Include="..\..\Obeliks\PosTagger\PosTagger.csproj">
       <Project>{915DA0E9-1BA2-4BBF-87AC-734D49B1EBFC}</Project>
-      <Name>PosTagger2010</Name>
+      <Name>PosTagger</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

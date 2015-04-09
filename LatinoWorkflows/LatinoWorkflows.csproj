@@ -40,7 +40,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;THROW_EXCEPTIONS</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;THROW_EXCEPTIONS; OLD_HTML_OUTPUT</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
@@ -75,17 +75,17 @@
     <Compile Include="PassOnComponent.cs" />
     <Compile Include="Persistance\DocumentWriterComponent.cs" />
     <Compile Include="Semantics\DocumentCategorizerComponent.cs" />
-    <Compile Include="Semantics\EntityRecognitionComponent.cs" />
-    <Compile Include="Semantics\EntityRecognitionEngine.cs" />
+    <None Include="Semantics\EntityRecognitionComponent.cs" />
+    <None Include="Semantics\EntityRecognitionEngine.cs" />
     <Compile Include="StreamDataProducer.cs" />
     <Compile Include="TextMining\BoilerplateRemoverComponent.cs" />
     <Compile Include="TextMining\DocumentCorpus\DocumentSerializer.cs" />
     <Compile Include="TextMining\HtmlTokenizerComponent.cs" />
     <Compile Include="TextMining\DocumentCorpus\Tree.cs" />
     <Compile Include="TextMining\EnglishLemmatizerComponent.cs" />
-    <Compile Include="TextMining\EnglishTokenizerComponent.cs" />
+    <None Include="TextMining\EnglishTokenizerComponent.cs" />
     <Compile Include="TextMining\LanguageDetectorComponent.cs" />
-    <Compile Include="TextMining\EnglishPosTaggerComponent.cs" />
+    <None Include="TextMining\EnglishPosTaggerComponent.cs" />
     <Compile Include="TextMining\RssFeedComponent.cs" />
     <Compile Include="GenericStreamDataProducerPoll.cs" />
     <Compile Include="TextMining\DocumentCorpus\Annotation.cs" />
@@ -104,7 +104,7 @@
     <Compile Include="TextMining\RegexTokenizerComponent.cs" />
     <Compile Include="TextMining\DocumentCorpus\TextBlock.cs" />
     <Compile Include="IWorkflowComponent.cs" />
-    <Compile Include="TextMining\SentenceSplitterComponent.cs" />
+    <None Include="TextMining\SentenceSplitterComponent.cs" />
     <Compile Include="TextMining\UrlTreeBoilerplateRemoverComponent.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -119,7 +119,7 @@
     <Content Include="TODO.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Latino\Latino.Net40.csproj">
+    <ProjectReference Include="..\Latino\LatinoLite.csproj">
       <Project>{5B86AAD5-3FEA-487C-A518-4F846AF09E18}</Project>
       <Name>Latino.Net40</Name>
     </ProjectReference>

@@ -176,7 +176,7 @@ namespace OPA.Analysis
             models.Add(new Pair<string, IModel<string>>("NCC", ncc));            
             //KnnClassifier<string, SparseVector<double>> knn = new KnnClassifier<string, SparseVector<double>>(new SingleFeatureSimilarity());
             //models.Add(new Pair<string, IModel<string>>("kNN", knn)); // *** kNN is too slow 
-            SvmMulticlassFast<string> svm = new SvmMulticlassFast<string>();
+            SvmMulticlassClassifier<string> svm = new SvmMulticlassClassifier<string>();
             models.Add(new Pair<string, IModel<string>>("SVM", svm));
             MajorityClassifier<string, SparseVector<double>> maj = new MajorityClassifier<string, SparseVector<double>>();
             models.Add(new Pair<string, IModel<string>>("Majority", maj));
@@ -207,11 +207,11 @@ namespace OPA.Analysis
                             else
                             {
                                 string cacheFileName = Config.OutputFolder + "\\svm-" + classType + "-" + featureNames[fIdx] + "-" + foldNum + ".bin";
-                                if (model is SvmMulticlassFast<string> && File.Exists(cacheFileName))
+                                if (model is SvmMulticlassClassifier<string> && File.Exists(cacheFileName))
                                 {
                                     using (BinarySerializer bs = new BinarySerializer(cacheFileName, FileMode.Open))
                                     {
-                                        ((SvmMulticlassFast<string>)model).Load(bs);
+                                        ((SvmMulticlassClassifier<string>)model).Load(bs);
                                     }
                                 }
                                 else
@@ -241,7 +241,7 @@ namespace OPA.Analysis
             // train full models
             Console.WriteLine("Treniram klasifikacijske modele...");
             models.Clear();
-            SvmMulticlassFast<string> svmFull = new SvmMulticlassFast<string>();
+            SvmMulticlassClassifier<string> svmFull = new SvmMulticlassClassifier<string>();
             models.Add(new Pair<string, IModel<string>>("SVM", svmFull));
             //NearestCentroidClassifier<string> nccFull = new NearestCentroidClassifier<string>();
             //nccFull.Similarity = new ManhattanSimilarity();
@@ -269,11 +269,11 @@ namespace OPA.Analysis
                         else
                         {
                             string cacheFileName = Config.OutputFolder + "\\svm-" + classType + "-full-" + foldNum + ".bin";
-                            if (model is SvmMulticlassFast<string> && File.Exists(cacheFileName))
+                            if (model is SvmMulticlassClassifier<string> && File.Exists(cacheFileName))
                             {
                                 using (BinarySerializer bs = new BinarySerializer(cacheFileName, FileMode.Open))
                                 {
-                                    ((SvmMulticlassFast<string>)model).Load(bs);
+                                    ((SvmMulticlassClassifier<string>)model).Load(bs);
                                 }
                             }
                             else
